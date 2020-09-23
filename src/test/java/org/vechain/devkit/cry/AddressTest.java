@@ -1,6 +1,5 @@
 package org.vechain.devkit.cry;
 
-
 import org.testng.annotations.*;
 import static org.testng.Assert.*;
 
