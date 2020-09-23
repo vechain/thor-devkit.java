@@ -10,6 +10,11 @@ public class Keccak {
         Security.addProvider(new BouncyCastleProvider());
     }
 
+    /**
+     * Use Keccak 256 algorithm to hash the inputs.
+     * @param inputs several inputs, each input of bytes[] format.
+     * @return bytes[] of 32 length.
+     */
     public static byte[] keccak256(byte[]... inputs) {
         KeccakDigest keccak = new KeccakDigest(256);
         for (byte[] input : inputs) {

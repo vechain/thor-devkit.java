@@ -3,8 +3,8 @@ package org.vechain.devkit.cry;
 public class Utils {
     /**
      * Convert byte[] to its corresponding hex String.
-     * @param input
-     * @return
+     * @param input byte[]
+     * @return String the hex representation.
      */
     public static String bytesToHex(byte[] input) {
         StringBuffer ret = new StringBuffer();

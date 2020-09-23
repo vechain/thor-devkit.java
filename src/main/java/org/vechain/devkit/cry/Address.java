@@ -7,6 +7,10 @@ import java.util.List;
 import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
 
+/**
+ * Address class contains convenient functions to
+ * mangle the addresses.
+ */
 public class Address {
     
     /**
