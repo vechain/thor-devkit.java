@@ -5,7 +5,7 @@ import static org.testng.Assert.*;
 
 import java.nio.charset.Charset;
 
-public class KeccakTest {
+public class Blake2bTest {
 
     public static String toHexString(byte[] input) {
         StringBuffer ret = new StringBuffer();
@@ -16,28 +16,28 @@ public class KeccakTest {
     }
 
     @Test
-    public void keccak256Test() {
+    public void blake2bTest() {
         String input = "hello world";
-        byte[] output = Keccak.keccak256(
+        byte[] output = Blake2b.blake2b(
             input.getBytes(Charset.forName("US-ASCII"))
         );
         assertEquals(
             toHexString(output),
-            "47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad"
+            "256c83b297114d201b30179f3f0ef0cace9783622da5974326b436178aeef610"
         );
     }
 
     @Test
-    public void keccak256Test2() {
+    public void blake2bTest2() {
         String[] inputs = {"hello", " ", "world"};
-        byte[] output = Keccak.keccak256(
+        byte[] output = Blake2b.blake2b(
             inputs[0].getBytes(Charset.forName("US-ASCII")),
             inputs[1].getBytes(Charset.forName("US-ASCII")),
             inputs[2].getBytes(Charset.forName("US-ASCII"))
         );
         assertEquals(
             toHexString(output),
-            "47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad"
+            "256c83b297114d201b30179f3f0ef0cace9783622da5974326b436178aeef610"
         );
     }
 }
