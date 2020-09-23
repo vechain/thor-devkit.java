@@ -13,7 +13,7 @@ public class Blake2b {
     /**
      * Use Blake2b algorithm to hash the inputs.
      * @param inputs several inputs, each input of bytes[] format.
-     * @return bytes[]
+     * @return bytes[] of 32 length.
      */
     public static byte[] blake2b(byte[]... inputs) {
         Blake2bDigest blake2bDigest = new Blake2bDigest(256);
