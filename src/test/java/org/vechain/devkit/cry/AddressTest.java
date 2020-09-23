@@ -15,13 +15,13 @@ public class AddressTest {
         };
 
         for (String item : addresses) {
-            String result = Address.remove_0x(item);
+            String result = Address.remove0x(item);
             assertFalse(result.startsWith("0x"));
         }
 
         assertEquals(
             "D1220A0cf47c7B9Be7A2E6BA89F429762e7b9aDb", 
-            "D1220A0cf47c7B9Be7A2E6BA89F429762e7b9aDb"
+            Address.remove0x("D1220A0cf47c7B9Be7A2E6BA89F429762e7b9aDb")
         );
     }
 }

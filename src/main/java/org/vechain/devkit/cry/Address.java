@@ -7,7 +7,7 @@ public class Address {
      * @param input The input string.
      * @return The stripped string.
      */
-    public static String remove_0x (String input) {
+    public static String remove0x (String input) {
         return input.replaceFirst("0(x|X)", "");
     }
 }
