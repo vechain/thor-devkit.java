@@ -14,14 +14,22 @@ public class AddressTest {
             "0xD1220A0cf47c7B9Be7A2E6BA89F429762e7b9aDb"
         };
 
+        // Normal 0x strings.
         for (String item : addresses) {
             String result = Address.remove0x(item);
             assertFalse(result.startsWith("0x"));
         }
 
+        // No 0x at all.
         assertEquals(
             "D1220A0cf47c7B9Be7A2E6BA89F429762e7b9aDb", 
             Address.remove0x("D1220A0cf47c7B9Be7A2E6BA89F429762e7b9aDb")
+        );
+
+        // 0x in the middle.
+        assertEquals(
+            "D120x20A0cf47c7B9Be7A2E6BA89F429762e7b9aDb", 
+            Address.remove0x("D120x20A0cf47c7B9Be7A2E6BA89F429762e7b9aDb")
         );
     }
 }

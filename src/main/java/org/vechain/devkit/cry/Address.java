@@ -8,6 +8,6 @@ public class Address {
      * @return The stripped string.
      */
     public static String remove0x (String input) {
-        return input.replaceFirst("0(x|X)", "");
+        return input.replaceFirst("^0(x|X)", "");
     }
 }
