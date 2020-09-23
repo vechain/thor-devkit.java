@@ -7,14 +7,6 @@ import java.nio.charset.Charset;
 
 public class Blake2bTest {
 
-    public static String toHexString(byte[] input) {
-        StringBuffer ret = new StringBuffer();
-        for (byte a : input) {
-            ret.append(String.format("%02x", a));
-        }
-        return ret.toString();
-    }
-
     @Test
     public void blake2bTest() {
         String input = "hello world";
@@ -22,7 +14,7 @@ public class Blake2bTest {
             input.getBytes(Charset.forName("US-ASCII"))
         );
         assertEquals(
-            toHexString(output),
+            Utils.bytesToHex(output),
             "256c83b297114d201b30179f3f0ef0cace9783622da5974326b436178aeef610"
         );
     }
@@ -36,7 +28,7 @@ public class Blake2bTest {
             inputs[2].getBytes(Charset.forName("US-ASCII"))
         );
         assertEquals(
-            toHexString(output),
+            Utils.bytesToHex(output),
             "256c83b297114d201b30179f3f0ef0cace9783622da5974326b436178aeef610"
         );
     }
