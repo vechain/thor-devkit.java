@@ -29,6 +29,11 @@ public class Address {
         return true;
     }
 
+    /**
+     * Convert an uncompressed public key to address bytes. (20 bytes)
+     * @param input Uncompressed public key, 65 bytes.
+     * @return 20 bytes.
+     */
     public static byte[] publicKeyToAddressBytes(byte[] input) {
         isUncompressedPublicKey(input);
         // Get rid of 0x04 (first byte)
@@ -39,17 +44,26 @@ public class Address {
         return Arrays.copyOfRange(h, 12, h.length);
     }
 
+    /**
+     * If the input is a roughly correct address.
+     * @param input string of an address.
+     * @return true/false.
+     */
     public static boolean isAddress(String input) {
         return input.matches("(?i)^0x[0-9a-f]{40}$");
     }
 
+    /**
+     * Convert the address into a checksumed address.
+     * @param input the address string.
+     * @return the checksumed address string.
+     */
     public static String toChecksumAddress(String input) {
         if (!isAddress(input)) {
             throw new IllegalArgumentException("address is not valid.");
         }
 
-        String body = Utils.remove0x(input);
-        body = body.toLowerCase();
+        String body = Utils.remove0x(input).toLowerCase();
 
         byte[] h = Keccak.keccak256(body.getBytes(Charsets.US_ASCII));
         String hash = Utils.bytesToHex(h);
