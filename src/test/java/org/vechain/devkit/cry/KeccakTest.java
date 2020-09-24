@@ -3,7 +3,6 @@ package org.vechain.devkit.cry;
 import org.testng.annotations.*;
 import static org.testng.Assert.*;
 
-import com.google.common.base.Charsets;
 
 public class KeccakTest {
 
@@ -11,7 +10,7 @@ public class KeccakTest {
     public void keccak256Test() {
         String input = "hello world";
         byte[] output = Keccak.keccak256(
-            input.getBytes(Charsets.US_ASCII)
+            Utils.AsciiToBytes(input)
         );
         assertEquals(
             Utils.bytesToHex(output),
@@ -23,9 +22,9 @@ public class KeccakTest {
     public void keccak256Test2() {
         String[] inputs = {"hello", " ", "world"};
         byte[] output = Keccak.keccak256(
-            inputs[0].getBytes(Charsets.US_ASCII),
-            inputs[1].getBytes(Charsets.US_ASCII),
-            inputs[2].getBytes(Charsets.US_ASCII)
+            Utils.AsciiToBytes(inputs[0]),
+            Utils.AsciiToBytes(inputs[1]),
+            Utils.AsciiToBytes(inputs[2])
         );
         assertEquals(
             Utils.bytesToHex(output),

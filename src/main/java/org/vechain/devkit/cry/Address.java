@@ -12,16 +12,6 @@ import com.google.common.base.Joiner;
  * mangle the addresses.
  */
 public class Address {
-    
-    /**
-     * Remove the "0x" from a string.
-     * @param input The input string.
-     * @return The stripped string.
-     */
-    public static String remove0x (String input) {
-        return input.replaceFirst("^0(x|X)", "");
-    }
-
     /**
      * Check if the public key is 65 bytes, and starts with 4.
      * @param input
@@ -42,7 +32,7 @@ public class Address {
     public static byte[] publicKeyToAddressBytes(byte[] input) {
         isUncompressedPublicKey(input);
         // Get rid of 0x04 (first byte)
-        byte[] slice = Arrays.copyOfRange(input, 0, input.length);
+        byte[] slice = Utils.remove0x04(input);
         // Hash the slice and get 32 bytes of result.
         byte[] h = Keccak.keccak256(slice);
         // Get the last 20 bytes from the 32 bytes.
@@ -58,7 +48,7 @@ public class Address {
             throw new IllegalArgumentException("address is not valid.");
         }
 
-        String body = remove0x(input);
+        String body = Utils.remove0x(input);
         body = body.toLowerCase();
 
         byte[] h = Keccak.keccak256(body.getBytes(Charsets.US_ASCII));
