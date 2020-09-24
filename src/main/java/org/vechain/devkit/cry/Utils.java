@@ -1,6 +1,6 @@
 package org.vechain.devkit.cry;
 
-public class Utils {
+class Utils { // only package level visibility.
     /**
      * Convert byte[] to its corresponding hex String.
      * @param input byte[]
