@@ -89,7 +89,7 @@ public class Address {
      */
     public static String toChecksumAddress(String input) {
         if (!isAddress(input)) {
-            throw new IllegalArgumentException("address is not valid.");
+            throw new IllegalArgumentException("address illegal.");
         }
 
         String body = Utils.remove0x(input).toLowerCase();
