@@ -4,6 +4,9 @@ import java.security.Security;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.crypto.digests.Blake2bDigest;
 
+/**
+ * This class deals with blake2b hashing functions.
+ */
 public class Blake2b {
 
     static {

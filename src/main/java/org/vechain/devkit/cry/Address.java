@@ -8,12 +8,13 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
 
 /**
- * Address class contains convenient functions to
- * mangle the addresses.
+ * Address class contains convenient functions to deal with the conversion of
+ * addresses.
  */
 public class Address {
     /**
      * Check if the public key is 65 bytes, and starts with 4.
+     * 
      * @param input
      * @return
      */
@@ -31,7 +32,8 @@ public class Address {
 
     /**
      * Convert an uncompressed public key to address bytes. (20 bytes)
-     * @param input Uncompressed public key, 65 bytes.
+     * 
+     * @param input The uncompressed public key, 65 bytes.
      * @return 20 bytes.
      */
     public static byte[] publicKeyToAddressBytes(byte[] input) {
@@ -45,7 +47,19 @@ public class Address {
     }
 
     /**
+     * Convert a public key to address, in string format.
+     * 
+     * @param input The uncompressed public key, 65 bytes.
+     * @return "0x..." style address string. (42 chars including 0x).
+     */
+    public static String publicKeyToAddressString(byte[] input) {
+        byte[] b = publicKeyToAddressBytes(input);
+        return Utils.prepend0x(Utils.bytesToHex(b));
+    }
+
+    /**
      * If the input is a roughly correct address.
+     * 
      * @param input string of an address.
      * @return true/false.
      */
@@ -54,7 +68,22 @@ public class Address {
     }
 
     /**
+     * Convert an address string to lower case address string.
+     * 
+     * @param input address string.
+     * @return lower case address string.
+     */
+    public static String toLowerCaseAddress(String input) {
+        if (!isAddress(input)) {
+            throw new IllegalArgumentException("address is not valid.");
+        }
+
+        return input.toLowerCase();
+    }
+
+    /**
      * Convert the address into a checksumed address.
+     * 
      * @param input the address string.
      * @return the checksumed address string.
      */
@@ -72,10 +101,10 @@ public class Address {
         parts.add("0x");
 
         for (int i = 0; i < body.length(); i++) { // loop over body.
-            if (Integer.parseInt(hash.substring(i, i+1), 16) >= 8) {
-                parts.add(body.substring(i, i+1).toUpperCase());
+            if (Integer.parseInt(hash.substring(i, i + 1), 16) >= 8) {
+                parts.add(body.substring(i, i + 1).toUpperCase());
             } else {
-                parts.add(body.substring(i, i+1));
+                parts.add(body.substring(i, i + 1));
             }
         }
 

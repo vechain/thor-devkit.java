@@ -4,6 +4,9 @@ import java.security.Security;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.crypto.digests.KeccakDigest;
 
+/**
+ * This class deals with keccak 256 hashing.
+ */
 public class Keccak {
 
     static {

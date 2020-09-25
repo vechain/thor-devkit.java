@@ -31,4 +31,12 @@ public class UtilsTest {
             Utils.remove0x("D120x20A0cf47c7B9Be7A2E6BA89F429762e7b9aDb")
         );
     }
+
+    @Test
+    public void hexAndByteTest() {
+        assertEquals(new byte[]{15}, Utils.hexToBytes("0F"));
+        assertEquals(new byte[]{15,15}, Utils.hexToBytes("0F0f"));
+
+        assertEquals(new byte[]{49,50,51}, Utils.AsciiToBytes("123"));
+    }
 }
