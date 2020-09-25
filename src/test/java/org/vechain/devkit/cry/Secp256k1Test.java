@@ -46,5 +46,7 @@ public class Secp256k1Test {
         assertEquals(
                 Secp256k1.recover(msgHash, new Signature(sigBytes).getECDSASignature(), new Signature(sigBytes).getV()),
                 pub);
+
+        assertEquals(Secp256k1.recover(msgHash, sigBytes), pub);
     }
 }

@@ -108,20 +108,35 @@ public class Secp256k1 {
     }
 
     /**
-     * Recover the uncompressed public key from the signature. The first byte is
-     * "0x04" representing uncompressed format.
+     * Recover the uncompressed public key from the signature.
      * 
-     * @param messageHash
+     * @param messageHash byte[32]
      * @param signature
      * @param v
-     * @return byte[65] uncompressed public key.
+     * @return byte[65] uncompressed public key. First byte "0x04"
      */
     public static byte[] recover(byte[] messageHash, ECDSASignature signature, int v) {
+        if (!isValidMessageHash(messageHash)) {
+            throw new IllegalArgumentException("messageHash length wrong.");
+        }
         BigInteger key = Sign.recoverFromSignature(v, signature, messageHash);
         if (key != null) {
             return Arrays.concatenate(new byte[] { (byte) 4 }, Numeric.toBytesPadded(key, 64));
         } else {
             return null;
         }
+    }
+
+    /**
+     * Recover the uncompressed public key from the signature. The first byte is
+     * "0x04" representing uncompressed format.
+     * 
+     * @param messageHash byte[32]
+     * @param signature   byte[65]
+     * @return byte[65] uncompressed public key. First byte "0x04"
+     */
+    public static byte[] recover(byte[] messageHash, byte[] signature) {
+        Signature s = new Signature(signature);
+        return Secp256k1.recover(messageHash, s.getECDSASignature(), s.getV());
     }
 }
