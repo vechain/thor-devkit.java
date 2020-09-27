@@ -56,7 +56,7 @@ public class Mnemonic {
     }
 
     /**
-     * Derive a seed from words.
+     * Derive a seed from words. Normally you won't use this function alone.
      * 
      * @param words
      * @return
@@ -67,7 +67,8 @@ public class Mnemonic {
     }
 
     /**
-     * Derive a direct private key (in bytes) from seed.
+     * Derive a direct private key (in bytes) from words. This is a convenient
+     * function, please use HDNode if you need to derive a lot of child key pairs.
      * 
      * @param words
      * @param index
