@@ -28,6 +28,7 @@ dependencies {
     implementation 'org.bouncycastle:bcprov-jdk15on:1.66'
     implementation 'org.bitcoinj:bitcoinj-core:0.14.7' // Bitcoinj
     implementation 'org.web3j:crypto:5.0.0' // Web3j
+    implementation 'org.web3j:core:5.0.0' // Web3j
 
     // Use TestNG framework, also requires calling test.useTestNG() below
     testImplementation 'org.testng:testng:7.3.0'

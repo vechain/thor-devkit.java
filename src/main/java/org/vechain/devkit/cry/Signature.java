@@ -9,14 +9,25 @@ import java.math.BigInteger;
 import com.google.common.primitives.Bytes;
 
 class Signature {
-    private ECDSASignature sig;
-    private int v;
+    protected ECDSASignature sig;
+    protected int v;
 
+    /**
+     * Initiate a signature from a ECDSASignature and a recovery byte.
+     * 
+     * @param sig
+     * @param v
+     */
     Signature(ECDSASignature sig, int v) {
         this.sig = sig;
         this.v = v;
     }
 
+    /**
+     * Initiate a signature from 65 bytes.
+     * 
+     * @param sigBytes
+     */
     Signature(byte[] sigBytes) {
         if (sigBytes.length != 65) {
             throw new RuntimeException("signature bytes shall be 65 length.");
@@ -32,7 +43,7 @@ class Signature {
     /**
      * Serialize the signature to byte[].
      * 
-     * @return
+     * @return byte[65]
      */
     public byte[] serialize() {
         byte[] r = Numeric.toBytesPadded(this.sig.r, 32);

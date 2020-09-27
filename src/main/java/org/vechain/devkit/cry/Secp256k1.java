@@ -8,6 +8,10 @@ import org.web3j.crypto.ECDSASignature;
 import org.web3j.crypto.Sign;
 import org.web3j.utils.Numeric;
 
+/**
+ * Byte-based sign/recover convenient functions. This implementation tries to
+ * remove the need for "class" as much as possible.
+ */
 public class Secp256k1 {
 
     // MAX is the maximum number used as private key.
@@ -108,14 +112,15 @@ public class Secp256k1 {
     }
 
     /**
-     * Recover the uncompressed public key from the signature.
+     * Recover the uncompressed public key from the signature. This function should
+     * not be exposed to outside callers.
      * 
      * @param messageHash byte[32]
      * @param signature
      * @param v
      * @return byte[65] uncompressed public key. First byte "0x04"
      */
-    public static byte[] recover(byte[] messageHash, ECDSASignature signature, int v) {
+    protected static byte[] recover(byte[] messageHash, ECDSASignature signature, int v) {
         if (!isValidMessageHash(messageHash)) {
             throw new IllegalArgumentException("messageHash length wrong.");
         }
