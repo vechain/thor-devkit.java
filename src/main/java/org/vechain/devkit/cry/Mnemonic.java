@@ -71,7 +71,7 @@ public class Mnemonic {
      * function, please use HDNode if you need to derive a lot of child key pairs.
      * 
      * @param words
-     * @param index
+     * @param index Just fill in 0 as the first private key.
      * @return
      */
     public static byte[] derive_private_key(List<String> words, int index) {
