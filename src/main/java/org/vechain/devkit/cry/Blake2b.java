@@ -18,7 +18,7 @@ public class Blake2b {
      * @param inputs several inputs, each input of bytes[] format.
      * @return bytes[] of 32 length.
      */
-    public static byte[] blake2b(byte[]... inputs) {
+    public static byte[] blake2b256(byte[]... inputs) {
         Blake2bDigest blake2bDigest = new Blake2bDigest(256);
         for (byte[] input : inputs) {
             blake2bDigest.update(input, 0, input.length);

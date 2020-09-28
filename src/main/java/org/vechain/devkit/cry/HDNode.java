@@ -1,7 +1,6 @@
 package org.vechain.devkit.cry;
 
 import java.util.List;
-import org.bitcoinj.crypto.ChildNumber;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.HDKeyDerivation;
 

@@ -10,7 +10,7 @@ public class Blake2bTest {
     @Test
     public void blake2bTest() {
         String input = "hello world";
-        byte[] output = Blake2b.blake2b(
+        byte[] output = Blake2b.blake2b256(
             input.getBytes(Charset.forName("US-ASCII"))
         );
         assertEquals(
@@ -22,7 +22,7 @@ public class Blake2bTest {
     @Test
     public void blake2bTest2() {
         String[] inputs = {"hello", " ", "world"};
-        byte[] output = Blake2b.blake2b(
+        byte[] output = Blake2b.blake2b256(
             inputs[0].getBytes(Charset.forName("US-ASCII")),
             inputs[1].getBytes(Charset.forName("US-ASCII")),
             inputs[2].getBytes(Charset.forName("US-ASCII"))
