@@ -27,9 +27,9 @@ public class HDNodeTest {
         // Generate from words.
         HDNode topMostNode = HDNode.fromMnemonic(myWords);
         assertEquals(Utils.hexToBytes(private_key_hex), topMostNode.derive(0).getPrivateKey());
-        // Generate from seed.
+        // Generate from seed. Should be the same as words.
         HDNode topMostNode2 = HDNode.fromSeed(Utils.hexToBytes(seed_hex));
-        assertEquals(Utils.hexToBytes(private_key_hex), topMostNode2.derive(0).getPrivateKey());
+        assertEquals(topMostNode.getPrivateKey(), topMostNode2.getPrivateKey());
 
         // Derive children test.
         for (int i = 0; i < addresses.length; i++) {

@@ -96,20 +96,33 @@ public class HDNode {
         return new HDNode(HDKeyDerivation.deriveChildKey(this.pair, childNumber));
     }
 
+    /**
+     * Get uncompressed public key in byte[65].
+    */ 
     public byte[] getPublicKey() {
         return this.pair.decompress().getPubKey();
     }
 
+    /**
+     * Get private key in byte[32]
+     * @return byte[32]
+     */
     public byte[] getPrivateKey() {
         return this.pair.getPrivKeyBytes();
     }
 
+    /**
+     * Get chain code in byte[]
+     * @return
+     */
     public byte[] getChainCode() {
         return this.pair.getChainCode();
     }
 
-    // Returns the first 32 bits.
-    // TODO, no tests available yet.
+    /**
+     * Get finger print in int. (should be 32 bits)
+     * @return
+     */
     public int getFingerPrint() {
         return this.pair.getFingerprint();
     }
