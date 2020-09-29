@@ -5,19 +5,20 @@ import org.vechain.devkit.cry.Blake2b;
 /**
  * Bloom filter, has some important fields.
  * 
- * k = how many different hash functions shall be used. m = total bits of the
- * filter. n = total items estimated to be put into the filter.
+ * k = how many different hash functions shall be used.
+ * m = total bits of the filter.
+ * n = total items estimated to be put into the filter.
  */
 public class Bloom {
     public static final int MAX_K = 16; // Max k allowed.
-    public static final int BITS_SIZE = 2048; // Size of the filter (in bits) recommended.
+    public static final int BITS_SIZE = 2048; // Size of the filter (in bits).
 
     private int k;
     private byte[] storage;
 
     /**
-     * Initialize a filter from an existing storage. If you don't know k, just call
-     * estimateK() first.
+     * Initialize a filter from an existing storage.
+     * If you don't know k, just call estimateK() first.
      */
     public Bloom(int k, byte[] storage) {
         this.k = k;
@@ -25,7 +26,8 @@ public class Bloom {
     }
 
     /**
-     * Initialize a filter. If you don't know k, just call estimateK() first.
+     * Initialize a filter.
+     * If you don't know k, just call estimateK() first.
      */
     public Bloom(int k) {
         this.k = k;

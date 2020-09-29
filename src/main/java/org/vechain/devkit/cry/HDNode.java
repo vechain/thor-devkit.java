@@ -29,7 +29,12 @@ public class HDNode {
     // This is a constant for VET path.
     // it simply adds 44', 818', 0', 0 to the path.
     // m / 44' / 818' / 0' / 0
-    private static final int[] VET_PATH = new int[] { 44 + HARDENED_BIT, 818 + HARDENED_BIT, 0 + HARDENED_BIT, 0 };
+    private static final int[] VET_PATH = new int[] { 
+        44 + HARDENED_BIT,
+        818 + HARDENED_BIT,
+        0 + HARDENED_BIT,
+        0
+    };
 
     private DeterministicKey pair;
 
@@ -38,8 +43,8 @@ public class HDNode {
     }
 
     /**
-     * This will generate a top-most HDNode for VET wallets. All keypairs will
-     * derive as its children.
+     * This will generate a top-most HDNode for VET wallets.
+     * All keypairs will derive as its children.
      * 
      * @param seed
      */
@@ -69,14 +74,16 @@ public class HDNode {
     /**
      * This will generate an HDNode.
      * 
-     * But it cannot further derive HDNode with private key. Only can derive public
-     * key nodes.
+     * But it cannot further derive HDNode with private key. 
+     * Only can derive public key nodes.
      * 
      * @param pub
      * @param chainCode
      */
     public static HDNode fromPublicKey(byte[] pub, byte[] chainCode) {
-        return new HDNode(HDKeyDerivation.createMasterPubKeyFromBytes(pub, chainCode));
+        return new HDNode(
+            HDKeyDerivation.createMasterPubKeyFromBytes(pub, chainCode)
+        );
     }
 
     /**
@@ -88,11 +95,15 @@ public class HDNode {
      * @param chainCode
      */
     public static HDNode fromPrivateKey(byte[] priv, byte[] chainCode) {
-        return new HDNode(HDKeyDerivation.createMasterPrivKeyFromBytes(priv, chainCode));
+        return new HDNode(
+            HDKeyDerivation.createMasterPrivKeyFromBytes(priv, chainCode)
+        );
     }
 
     public HDNode derive(int childNumber) {
-        return new HDNode(HDKeyDerivation.deriveChildKey(this.pair, childNumber));
+        return new HDNode(
+            HDKeyDerivation.deriveChildKey(this.pair, childNumber)
+        );
     }
 
     /**

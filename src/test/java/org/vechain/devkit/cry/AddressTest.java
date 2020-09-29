@@ -21,8 +21,7 @@ public class AddressTest {
 
     @Test
     public void publicKeyToAddress() {
-        byte[] pub = Utils.hexToBytes(
-                "04b90e9bb2617387eba4502c730de65a33878ef384a46f1096d86f2da19043304afa67d0ad09cf2bea0c6f2d1767a9e62a7a7ecc41facf18f2fa505d92243a658f");
+        byte[] pub = Utils.hexToBytes("04b90e9bb2617387eba4502c730de65a33878ef384a46f1096d86f2da19043304afa67d0ad09cf2bea0c6f2d1767a9e62a7a7ecc41facf18f2fa505d92243a658f");
         byte[] address = Address.publicKeyToAddressBytes(pub);
         assertEquals(address, Utils.hexToBytes("d989829d88b0ed1b06edf5c50174ecfa64f14a64"));
         String address2 = Address.publicKeyToAddressString(pub);

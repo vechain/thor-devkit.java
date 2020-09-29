@@ -24,7 +24,7 @@ public class Address {
         }
 
         if (input[0] != 4) {
-            throw new IllegalArgumentException("Should starts with first byte as 4.");
+            throw new IllegalArgumentException("First byte should be 4.");
         }
 
         return true;

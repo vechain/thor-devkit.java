@@ -15,8 +15,12 @@ public class Mnemonic {
 
     // Derive path for the VET:
     // m / 44' / 818' / 0' / 0 /<address_index>
-    private static final int[] VET_PATH = new int[] { 44 + Bip32ECKeyPair.HARDENED_BIT,
-            818 + Bip32ECKeyPair.HARDENED_BIT, 0 + Bip32ECKeyPair.HARDENED_BIT, 0 };
+    private static final int[] VET_PATH = new int[] {
+        44 + Bip32ECKeyPair.HARDENED_BIT,
+        818 + Bip32ECKeyPair.HARDENED_BIT,
+        0 + Bip32ECKeyPair.HARDENED_BIT,
+        0
+    };
 
     /**
      * Generate a default 128 bit entropy mnemonic words.
@@ -32,13 +36,13 @@ public class Mnemonic {
      * 
      * The longer the length more words are created.
      * 
-     * @param entropyLength How many bits the entropy shall be: 128, 160, 192, 224,
-     *                      256.
+     * @param entropyLength How many bits the entropy shall be: 
+     *                      128, 160, 192, 224, 256.
      * @return A list of strings.
      */
     public static List<String> generate(int entropyLength) {
         if (!IntStream.of(L).anyMatch(x -> x == entropyLength)) {
-            throw new RuntimeException("entropyLength is wrong, see function description");
+            throw new RuntimeException("entropyLength is wrong.");
         }
         byte[] entropy = Utils.getRandomBytes(entropyLength / 8);
         String mnemonic = MnemonicUtils.generateMnemonic(entropy);
@@ -67,18 +71,24 @@ public class Mnemonic {
     }
 
     /**
-     * Derive a direct private key (in bytes) from words. This is a convenient
-     * function, please use HDNode if you need to derive a lot of child key pairs.
+     * Derive a direct private key (in bytes) from words.
+     * This is a convenient function, 
+     * please use HDNode.java if you need to derive a lot of child key pairs.
      * 
      * @param words
      * @param index Just fill in 0 as the first private key.
      * @return
      */
     public static byte[] derive_private_key(List<String> words, int index) {
-        byte[] seed = derive_seed(words);
-        Bip32ECKeyPair masterNode = Bip32ECKeyPair.generateKeyPair(seed);
+        // Correct our generation path 
         int[] myPath = Arrays.copyOfRange(VET_PATH, 0, VET_PATH.length + 1);
         myPath[myPath.length - 1] = index;
+
+        // Fetch the master HD node.
+        byte[] seed = derive_seed(words);
+        Bip32ECKeyPair masterNode = Bip32ECKeyPair.generateKeyPair(seed);
+
+        // Let it derive.
         Bip32ECKeyPair childNode = Bip32ECKeyPair.deriveKeyPair(masterNode, myPath);
         return childNode.getPrivateKey().toByteArray();
     }

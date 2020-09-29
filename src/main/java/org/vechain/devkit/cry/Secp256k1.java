@@ -15,8 +15,7 @@ import org.web3j.utils.Numeric;
 public class Secp256k1 {
 
     // MAX is the maximum number used as private key.
-    private static final byte[] MAX = Utils
-            .hexToBytes("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141");
+    private static final byte[] MAX = Utils.hexToBytes("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141");
 
     /**
      * Test if the private key is valid.
@@ -67,32 +66,32 @@ public class Secp256k1 {
     /**
      * Generate a valid public key from the given private key.
      * 
-     * @param privateKey
+     * @param priv
      * @param compressed The output public key is compressed or not.
      * @return
      */
-    public static byte[] derivePublicKey(byte[] privateKey, boolean compressed) {
-        ECKey pair = ECKey.fromPrivate(privateKey, compressed);
+    public static byte[] derivePublicKey(byte[] priv, boolean compressed) {
+        ECKey pair = ECKey.fromPrivate(priv, compressed);
         return pair.getPubKey();
     }
 
     /**
-     * Sign the message hash with a given private key. The signing result is a
-     * signature in byte[] of 65 length.
+     * Sign the message hash with a given private key.
+     * The signing result is a signature in byte[] of 65 length.
      * 
      * @param messageHash byte[32]
-     * @param privateKey  byte[32]
+     * @param priv  byte[32]
      * @return byte[65] = [r 32, s 32, v 1]
      */
-    public static byte[] sign(byte[] messageHash, byte[] privateKey) {
+    public static byte[] sign(byte[] messageHash, byte[] priv) {
         if (!isValidMessageHash(messageHash)) {
             throw new IllegalArgumentException("messageHash length wrong.");
         }
-        if (!isValidPrivateKey(privateKey)) {
-            throw new IllegalArgumentException("privateKey length or value wrong.");
+        if (!isValidPrivateKey(priv)) {
+            throw new IllegalArgumentException("priv length or value wrong.");
         }
 
-        ECKeyPair pair = ECKeyPair.create(privateKey);
+        ECKeyPair pair = ECKeyPair.create(priv);
         ECDSASignature sig = pair.sign(messageHash);
 
         int found = -1;
@@ -105,43 +104,46 @@ public class Secp256k1 {
         }
 
         if (found == -1) {
-            throw new RuntimeException("Cannot recover the pub key during sign.");
+            throw new RuntimeException("Cannot recover public key during sign.");
         }
 
         return new Signature(sig, found).serialize();
     }
 
     /**
-     * Recover the uncompressed public key from the signature. This function should
-     * not be exposed to outside callers.
+     * Recover the uncompressed public key from the signature.
+     * This function should not be exposed to outside callers.
      * 
-     * @param messageHash byte[32]
-     * @param signature
+     * @param msgHash byte[32]
+     * @param sig
      * @param v
      * @return byte[65] uncompressed public key. First byte "0x04"
      */
-    protected static byte[] recover(byte[] messageHash, ECDSASignature signature, int v) {
-        if (!isValidMessageHash(messageHash)) {
-            throw new IllegalArgumentException("messageHash length wrong.");
+    protected static byte[] recover(byte[] msgHash, ECDSASignature sig, int v) {
+        if (!isValidMessageHash(msgHash)) {
+            throw new IllegalArgumentException("msgHash length wrong.");
         }
-        BigInteger key = Sign.recoverFromSignature(v, signature, messageHash);
+        BigInteger key = Sign.recoverFromSignature(v, sig, msgHash);
         if (key != null) {
-            return Arrays.concatenate(new byte[] { (byte) 4 }, Numeric.toBytesPadded(key, 64));
+            return Arrays.concatenate(
+                new byte[] { (byte) 4 },
+                Numeric.toBytesPadded(key, 64)
+            );
         } else {
             return null;
         }
     }
 
     /**
-     * Recover the uncompressed public key from the signature. The first byte is
-     * "0x04" representing uncompressed format.
+     * Recover the uncompressed public key from the signature.
+     * The first byte is "0x04" representing uncompressed format.
      * 
-     * @param messageHash byte[32]
-     * @param signature   byte[65]
+     * @param msgHash byte[32]
+     * @param sig   byte[65]
      * @return byte[65] uncompressed public key. First byte "0x04"
      */
-    public static byte[] recover(byte[] messageHash, byte[] signature) {
-        Signature s = new Signature(signature);
-        return Secp256k1.recover(messageHash, s.getECDSASignature(), s.getV());
+    public static byte[] recover(byte[] msgHash, byte[] sig) {
+        Signature s = new Signature(sig);
+        return Secp256k1.recover(msgHash, s.getECDSASignature(), s.getV());
     }
 }
