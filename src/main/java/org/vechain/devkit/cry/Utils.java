@@ -7,7 +7,7 @@ import com.google.common.base.Charsets;
 /**
  * This class deals with int, string, byte[] conversions and stripping.
  */
-class Utils {
+public class Utils {
     /**
      * Remove the "0x" at the begin of a string.
      * 
@@ -88,6 +88,10 @@ class Utils {
      */
     public static byte[] AsciiToBytes(String input) {
         return input.getBytes(Charsets.US_ASCII);
+    }
+
+    public static byte[] UTF8ToBytes(String input) {
+        return input.getBytes(Charsets.UTF_8);
     }
 
     /**
