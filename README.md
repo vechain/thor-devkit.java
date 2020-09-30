@@ -86,7 +86,6 @@ System.out.println(
 ```java
 import org.vechain.devkit.cry.Mnemonic;
 
-
 List<String> words = Mnemonic.generate(128);
 System.out.println(words);
 // [carry, slow, attack, december, number, film, scale, faith, can, old, cage, expose]
@@ -115,7 +114,6 @@ import com.google.common.base.Splitter;
 import org.vechain.devkit.cry.Address;
 import org.vechain.devkit.cry.HDNode;
 import org.vechain.devkit.cry.Utils;
-
 
 String sentence = "ignore empty bird silly journey junior ripple have guard waste between tenant";
 List<String> words = Splitter.on(" ").splitToList(sentence);
@@ -163,6 +161,8 @@ for (int i = 0; i < 3; i++) {
 ### Keystore
 
 ```java
+import org.vechain.devkit.cry.Keystore;
+
 String ks =
     "{" +
     "    \"version\": 3," +
@@ -198,6 +198,7 @@ String ks = Keystore.encrypt(priv, password, true);
 ```java
 import org.vechain.devkit.cry.Keccak;
 import org.vechain.devkit.cry.Blake2b;
+import org.vechain.devkit.cry.Utils;
 
 String input = "hello world";
 String[] inputs = {"hello", " ", "world"};
@@ -221,6 +222,7 @@ byte[] output4 = Blake2b.blake2b256(
 
 ```java
 import org.vechain.devkit.Bloom;
+import org.vechain.devkit.cry.Utils;
 
 // Create a bloom filter that stores 100 items.
 int k = Bloom.estimateK(100);
