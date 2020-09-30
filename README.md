@@ -233,5 +233,5 @@ b.add(Utils.UTF8ToBytes("hello world"));
 
 // Test if exists.
 b.test(Utils.UTF8ToBytes("hello world")); // true.
-b.test(Utils.UTF8ToBytes("bye bye blue bird")); // true.
+b.test(Utils.UTF8ToBytes("bye bye blue bird")); // false.
 ```
