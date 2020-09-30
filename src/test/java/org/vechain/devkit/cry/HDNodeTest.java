@@ -4,7 +4,6 @@ import org.testng.annotations.*;
 import static org.testng.Assert.*;
 
 import java.util.List;
-
 import com.google.common.base.Splitter;
 
 public class HDNodeTest {
