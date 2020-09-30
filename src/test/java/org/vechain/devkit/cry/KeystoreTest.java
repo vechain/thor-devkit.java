@@ -17,7 +17,10 @@ public class KeystoreTest {
         "        \"kdfparams\": {" +
         "            \"dklen\": 32," +
         "            \"salt\": \"b57682e5468934be81217ad5b14ca74dab2b42c2476864592c9f3b370c09460a\"," +
-        "            \"n\": 262144," + "            \"r\": 8," + "            \"p\": 1" + "        }," +
+        "            \"n\": 262144," +
+        "            \"r\": 8," +
+        "            \"p\": 1" +
+        "        }," +
         "        \"cipher\": \"aes-128-ctr\"," +
         "        \"ciphertext\": \"88cb876f9c0355a89cad88ee7a17a2179700bc4306eaf78fa67320efbb4c7e31\"," +
         "        \"cipherparams\": {" +
