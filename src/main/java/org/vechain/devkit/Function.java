@@ -37,9 +37,9 @@ public class Function {
         byte[] b = this.encodeToBytes(args);
         String r = Utils.bytesToHex(b);
         if (prefix0x) {
-            return "0x" + r;
+            return Utils.prepend0x(r);
         } else {
-            return r;
+            return Utils.remove0x(r);
         }
     }
 }
