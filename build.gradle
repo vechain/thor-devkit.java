@@ -23,12 +23,12 @@ dependencies {
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     implementation 'com.google.guava:guava:29.0-jre'
 
-    // Crypto
-    implementation 'org.bouncycastle:bcpkix-jdk15on:1.66'
-    implementation 'org.bouncycastle:bcprov-jdk15on:1.66'
+    implementation 'org.bouncycastle:bcpkix-jdk15on:1.66' // Crypto
+    implementation 'org.bouncycastle:bcprov-jdk15on:1.66' // Crypto
     implementation 'org.bitcoinj:bitcoinj-core:0.14.7' // Bitcoinj
     implementation 'org.web3j:crypto:5.0.0' // Web3j
     implementation 'org.web3j:core:5.0.0' // Web3j
+    implementation 'com.esaulpaugh:headlong:3.8.2' // ABI, RLP
 
     // Use TestNG framework, also requires calling test.useTestNG() below
     testImplementation 'org.testng:testng:7.3.0'

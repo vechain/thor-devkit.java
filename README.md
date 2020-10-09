@@ -187,6 +187,7 @@ String ks =
     "    }" +
     "}";
 
+// Must be UTF_8 string.
 String password = "123456";
 // Decrypt from keystore to a private key.
 byte[] priv = Keystore.decrypt(ks, password);
@@ -209,6 +210,7 @@ byte[] output2 = Keccak.keccak256(
     Utils.AsciiToBytes(inputs[1]),
     Utils.AsciiToBytes(inputs[2])
 ); // output1 == outpu2
+
 
 byte[] output3 = Blake2b.blake2b256(Utils.AsciiToBytes(input));
 byte[] output4 = Blake2b.blake2b256(
