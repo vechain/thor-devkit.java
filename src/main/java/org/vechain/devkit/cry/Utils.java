@@ -61,6 +61,41 @@ public class Utils {
     }
 
     /**
+     * Prepend the given input string, with prefix. prefix will repeat
+     * several times.
+     * 
+     * eg. "abc", "0", 3 => "000abc"
+     * @param input
+     * @param prefix
+     * @param count
+     * @return
+     */
+    public static String prependChars(String input, String prefix, int count) {
+        return prefix.repeat(count) + input;
+    }
+
+    /**
+     * Prepend the given input string, with prefix.
+     * 
+     * Util the total length requirement is met.
+     * @param input
+     * @param prefix
+     * @param length
+     * @return
+     */
+    public static String extendString(String input, String prefix, int length) {
+        if (input.length() > length) {
+            return input;
+        }
+        final int wanted = length - input.length();
+        if (wanted % prefix.length() != 0) {
+            throw new IllegalArgumentException("cannot divide!");
+        }
+
+        return prefix.repeat( wanted / prefix.length() ) + input;
+    }
+
+    /**
      * Convert a string of hex to byte sequence. eg. "FF" to 255, "0f" to 15.
      * 
      * @param input The input string, must be of even length.
