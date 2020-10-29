@@ -7,9 +7,9 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.node.BigIntegerNode;
-
 import org.vechain.devkit.cry.Utils;
+
+// TODO - Seeking more tests.
 
 public class EventTest {
     final static String e1 =
