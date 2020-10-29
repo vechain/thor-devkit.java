@@ -163,7 +163,7 @@ public class FunctionTest {
         // Uncomment following line for debug.
         // System.out.println(f.decodeReturnV1Json(data, true, true));
 
-        List<V1DisplayWrapper> result = f.decodeReturnV1(data, true);
+        List<V1ParamWrapper> result = f.decodeReturnV1(data, true);
         assertEquals(result.size(), 2);
         assertEquals(result.get(0).name, "r1");
         assertEquals(result.get(0).value, "0xabc0000000000000000000000000000000000001");
@@ -179,11 +179,11 @@ public class FunctionTest {
         // Uncomment following line for debug.
         // System.out.println(f.decodeReturnV1Json(data, true, true));
         
-        List<V1DisplayWrapper> result = f.decodeReturnV1(data, true);
+        List<V1ParamWrapper> result = f.decodeReturnV1(data, true);
         assertEquals(result.get(0).name, "");
         assertEquals(result.get(0).value, "Hello World!");
 
-        List<V1DisplayWrapper> result2 = f.decodeReturnV1(data, false);
+        List<V1ParamWrapper> result2 = f.decodeReturnV1(data, false);
         assertEquals(result.get(0).name, "");
         assertEquals(result2.get(0).value, "Hello World!");
     }
@@ -195,7 +195,7 @@ public class FunctionTest {
         // Uncomment following line for debug.
         // System.out.println(f.decodeReturnV1Json(data, true, true));
 
-        List<V1DisplayWrapper> result = f.decodeReturnV1(data, false);
+        List<V1ParamWrapper> result = f.decodeReturnV1(data, false);
         assertEquals(result.get(0).value, true);
     }
 
@@ -208,12 +208,12 @@ public class FunctionTest {
         // System.out.println(f.decodeReturnV1Json(data, true, true));
 
         // Should be BigInteger if not "human".
-        List<V1DisplayWrapper> result = f.decodeReturnV1(data, false);
+        List<V1ParamWrapper> result = f.decodeReturnV1(data, false);
         assertEquals(result.get(0).value, new BigInteger("123456"));
         assertEquals(result.get(1).value, new BigInteger("-123456"));
 
         // Should be String representation choose to "human".
-        List<V1DisplayWrapper> result2 = f.decodeReturnV1(data, true);
+        List<V1ParamWrapper> result2 = f.decodeReturnV1(data, true);
         assertEquals(result2.get(0).value, "123456");
         assertEquals(result2.get(1).value, "-123456");
     }

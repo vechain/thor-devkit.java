@@ -93,20 +93,14 @@ public class Function {
     }
 
     /**
-     * Decode return data into a list of V1DisplayWrapper objects.
-     * 
-     * "human" option will enable the output:
-     * 1) "address" convert to "0x..." rather than BigInteger.
-     * 2) "bytes32"/"bytes[]" convert o "0x..." rather than byte[].
-     * 3) "unint256"/"int256" to "123456" rather than BigInteger.
-     * @param data
+     * Decode a Tuple according to TupleType, into a list of V1ParamWrapper objects.
+     * @param params
+     * @param guide
      * @param human
      * @return
      */
-    public List<V1DisplayWrapper> decodeReturnV1(byte[] data, boolean human) {
-        Tuple params = this.f.decodeReturn(data);
-        TupleType guide = this.f.getOutputTypes();
-        List<V1DisplayWrapper> c = new ArrayList<V1DisplayWrapper>();
+    public static List<V1ParamWrapper> decodeParams(Tuple params, TupleType guide, boolean human) {
+        List<V1ParamWrapper> c = new ArrayList<V1ParamWrapper>();
         int i = 0;
         for (ABIType<?> e : guide) {
             final int index = i;
@@ -133,11 +127,28 @@ public class Function {
                 }
             }
 
-            final V1DisplayWrapper dw = new V1DisplayWrapper(index, name, canonicalType, value);
+            final V1ParamWrapper dw = new V1ParamWrapper(index, name, canonicalType, value);
             c.add(dw);
             i++;
         }
         return c;
+    }
+
+    /**
+     * Decode return data into a list of V1ParamWrapper objects.
+     * 
+     * "human" option will enable the output:
+     * 1) address convert to "0x..." rather than BigInteger.
+     * 2) bytes32/bytes[] convert o "0x..." rather than byte[].
+     * 3) unint256/int256 to "123456" rather than BigInteger.
+     * @param data
+     * @param human
+     * @return
+     */
+    public List<V1ParamWrapper> decodeReturnV1(byte[] data, boolean human) {
+        Tuple params = this.f.decodeReturn(data);
+        TupleType guide = this.f.getOutputTypes();
+        return decodeParams(params, guide, human);
     }
 
     /**
@@ -149,7 +160,7 @@ public class Function {
      * @return The Json String.
      */
     public String decodeReturnV1Json(byte[] data, boolean pretty, boolean human) {
-        Collection<V1DisplayWrapper> c = decodeReturnV1(data, human);
+        Collection<V1ParamWrapper> c = decodeReturnV1(data, human);
         Gson gson = pretty ? new GsonBuilder().setPrettyPrinting().create() : new Gson();
         return gson.toJson(c);
     }
