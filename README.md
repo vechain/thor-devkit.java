@@ -17,7 +17,7 @@ Java (8+) library to assist smooth development on VeChain for developers and hob
 | Transaction Assembling (**Multi-task Transaction, MTT**). (TODO) |
 | Fee Delegation Transaction (**VIP-191**). (TODO)                 |
 | Self-signed Certificate (**VIP-192**). (TODO)                    |
-| ABI decoding of "functions" and "events" in logs. (TODO)         |
+| ABI decoding of "functions" and "events" in logs.          |
 
 ... and will always be updated with the **newest** features on VeChain.
 
@@ -160,32 +160,35 @@ for (int i = 0; i < 3; i++) {
 
 ### Keystore
 
-```java
+```kotlin
 import org.vechain.devkit.cry.Keystore;
 
-String ks =
-    "{" +
-    "    \"version\": 3," +
-    "    \"id\": \"f437ebb1-5b0d-4780-ae9e-8640178ffd77\"," +
-    "    \"address\": \"dc6fa3ec1f3fde763f4d59230ed303f854968d26\"," +
-    "    \"crypto\":" +
-    "    {"+
-    "        \"kdf\": \"scrypt\"," +
-    "        \"kdfparams\": {" +
-    "            \"dklen\": 32," +
-    "            \"salt\": \"b57682e5468934be81217ad5b14ca74dab2b42c2476864592c9f3b370c09460a\"," +
-    "            \"n\": 262144," +
-    "            \"r\": 8," +
-    "            \"p\": 1" +
-    "        }," +
-    "        \"cipher\": \"aes-128-ctr\"," +
-    "        \"ciphertext\": \"88cb876f9c0355a89cad88ee7a17a2179700bc4306eaf78fa67320efbb4c7e31\"," +
-    "        \"cipherparams\": {" +
-    "            \"iv\": \"de5c0c09c882b3f679876b22b6c5af21\"" +
-    "        }," +
-    "        \"mac\": \"8426e8a1e151b28f694849cb31f64cbc9ae3e278d02716cf5b61d7ddd3f6e728\"" + 
-    "    }" +
-    "}";
+// You need Java (15+) and up to use text blocks.
+// Otherwise just use a StringBuilder.
+String ks = """
+{
+    "version": 3,
+    "id": "f437ebb1-5b0d-4780-ae9e-8640178ffd77",
+    "address": "dc6fa3ec1f3fde763f4d59230ed303f854968d26",
+    "crypto":
+    {
+        "kdf": "scrypt",
+        "kdfparams": {
+            "dklen": 32,
+            "salt": "b57682e5468934be81217ad5b14ca74dab2b42c2476864592c9f3b370c09460a",
+            "n": 262144,
+            "r": 8,
+            "p": 1
+        },
+        "cipher": "aes-128-ctr",
+        "ciphertext": "88cb876f9c0355a89cad88ee7a17a2179700bc4306eaf78fa67320efbb4c7e31",
+        "cipherparams": {
+            "iv": "de5c0c09c882b3f679876b22b6c5af21"
+        },
+        "mac": "8426e8a1e151b28f694849cb31f64cbc9ae3e278d02716cf5b61d7ddd3f6e728""
+    }
+}
+""";
 
 // Must be UTF_8 string.
 String password = "123456";
@@ -236,4 +239,247 @@ b.add(Utils.UTF8ToBytes("hello world"));
 // Test if exists.
 b.test(Utils.UTF8ToBytes("hello world")); // true.
 b.test(Utils.UTF8ToBytes("bye bye blue bird")); // false.
+```
+
+### String/Hex
+```java
+
+import org.vechain.devkit.cry.Utils;
+
+// strip string
+assert Utils.remove0x("0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed") == "5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed";
+
+// hex -> byte[]
+assert new byte[]{15,15} == Utils.hexToBytes("0F0F") // true
+
+// byte[] -> hex
+assert Utils.bytesToHex(new byte[]{15,15}) == "0f0f"; // true
+
+// ascii -> byte[]
+assert new byte[]{49,50,51} == Utils.AsciiToBytes("123") // true
+```
+
+### Function - Encode Function Calls.
+```kotlin
+import org.vechain.devkit.Function;
+import org.vechain.devkit.cry.Utils;
+
+// You need Java (15+) and up to use text blocks.
+// Otherwise just use a StringBuilder.
+String f1 = """
+{
+    "constant": false,
+    "inputs": [
+        {
+            "name": "a1",
+            "type": "uint256"
+        },
+        {
+            "name": "a2",
+            "type": "string"
+        }
+    ],
+    "name": "f1",
+    "outputs": [
+        {
+            "name": "r1",
+            "type": "address"
+        },
+        {
+            "name": "r2",
+            "type": "bytes"
+        }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+}
+""";
+
+Function f = new Function(f1);
+
+// The selector of the function.
+assert f.selector() == Utils.hexToBytes("27fcbb2f");
+
+// Encode a function call with params (1, "foo").
+assert f.encodeToHex(true, BigInteger.valueOf(1), "foo") == "0x27fcbb2f000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000003666f6f0000000000000000000000000000000000000000000000000000000000";
+// Alternatively,
+// f.encodeToBytes() -> to byte[]
+// f.encode() -> to ByteBuffer
+```
+
+### Function - Decode Return Value
+```kotlin
+import org.vechain.devkit.Function;
+import org.vechain.devkit.cry.Utils;
+
+// You need Java (15+) and up to use text blocks.
+// Otherwise just use a StringBuilder.
+String f1 = """
+{
+    "constant": false,
+    "inputs": [
+        {
+            "name": "a1",
+            "type": "uint256"
+        },
+        {
+            "name": "a2",
+            "type": "string"
+        }
+    ],
+    "name": "f1",
+    "outputs": [
+        {
+            "name": "r1",
+            "type": "address"
+        },
+        {
+            "name": "r2",
+            "type": "bytes"
+        }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+}
+""";
+
+Function f = new Function(f1);
+
+// The function call return value.
+final byte[] data = Utils.hexToBytes("000000000000000000000000abc000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000003666f6f0000000000000000000000000000000000000000000000000000000000");
+
+// Decode to JSON String.
+String decoded = f.decodeReturnV1Json(data, true, true);
+String expected = """
+[
+  {
+    "index": 0,
+    "name": "r1",
+    "canonicalType": "address",
+    "value": "0xabc0000000000000000000000000000000000001"
+  },
+  {
+    "index": 1,
+    "name": "r2",
+    "canonicalType": "bytes",
+    "value": "0x666f6f"
+  }
+]
+""" // decoded == expected
+
+// Alternatively,
+// f.decodeReturnV1() -> Get raw Java types.
+List<V1ParamWrapper> result = f.decodeReturnV1(data, true);
+assert result.get(0).name, == "r1";
+assert result.get(0).value == "0xabc0000000000000000000000000000000000001";
+assert result.get(1).name == "r2";
+assert result.get(1).value == "0x666f6f";
+```
+
+### Function - Decode Return Value (Cont.)
+```kotlin
+import org.vechain.devkit.Function;
+import org.vechain.devkit.cry.Utils;
+
+// For unit64 and larger number types (eg. int72, unit256, address),
+// decode to BigInteger or to human-readable String.
+
+// For bytes1 ~ bytes32 and bytes[],
+// decode to byte[] or human-readable hex String.
+String f2 = """
+{
+    "inputs": [],
+    "name": "getBigNumbers",
+    "outputs": [
+        {
+            "internalType": "uint256",
+            "name": "a",
+            "type": "uint256"
+        },
+        {
+            "internalType": "int256",
+            "name": "b",
+            "type": "int256"
+        }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+}
+""";
+Function f = new Function(f2);
+
+// The function call return value.
+byte[] data = Utils.hexToBytes("000000000000000000000000000000000000000000000000000000000001e240fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe1dc0");
+
+// human=false
+List<V1ParamWrapper> result = f.decodeReturnV1(data, false);
+assert result.get(0).value == new BigInteger("123456");
+assert result.get(1).value == new BigInteger("-123456");
+
+// human=true
+List<V1ParamWrapper> result = f.decodeReturnV1(data, true);
+assert result.get(0).value == "123456"
+assert result.get(1).value == "-123456"
+
+```
+
+### Event
+```kotlin
+import org.vechain.devkit.Event;
+import org.vechain.devkit.cry.Utils;
+
+String e1 = """
+{
+    "anonymous": false,
+    "inputs": [
+        {
+            "indexed": true,
+            "name": "a1",
+            "type": "uint256"
+        },
+        {
+            "indexed": false,
+            "name": "a2",
+            "type": "string"
+        }
+    ],
+    "name": "E1",
+    "type": "event"
+}
+""";
+
+Event e = new Event(e1);
+
+// Signature
+byte[] expected = Utils.hexToBytes("47b78f0ec63d97830ace2babb45e6271b15a678528e901a9651e45b65105e6c2");
+assert e.calcEventSignature() == expected;
+
+// Topics (indexed params)
+List<byte[]> topics = new ArrayList<byte[]>();
+topics.add(Utils.hexToBytes("47b78f0ec63d97830ace2babb45e6271b15a678528e901a9651e45b65105e6c2"));
+topics.add(Utils.hexToBytes("0000000000000000000000000000000000000000000000000000000000000001"));
+
+// Decode the topics.
+List<V1ParamWrapper> indexedParams = e.decodeTopics(topics, false);
+assert indexedParams.size() == 1;
+assert indexedParams.get(0).canonicalType == "uint256";
+assert indexedParams.get(0).name == "a1";
+assert indexedParams.get(0).value == new BigInteger("1");
+// Alternatively,
+// e.decodeTopicsJson() -> Pretty JSON String.
+
+
+// Data (non-indexed params)
+byte[] data = Utils.hexToBytes("00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000003666f6f0000000000000000000000000000000000000000000000000000000000");
+
+// Deocde the data.
+List<V1ParamWrapper> nonIndexedParams = e.decodeDataV1(data, true);
+assert nonIndexedParams.size() == 1;
+assert nonIndexedParams.get(0).name == "a2";
+assert nonIndexedParams.get(0).canonicalType == "string";
+assert nonIndexedParams.get(0).value == "foo";
+// Alternatively,
+// e.decodeDataV1Json() -> Pretty JSON String.
 ```

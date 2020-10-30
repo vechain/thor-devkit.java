@@ -75,9 +75,8 @@ public class Utils {
     }
 
     /**
-     * Prepend the given input string, with prefix.
-     * 
-     * Util the total length requirement is met.
+     * Prepend the given input string, with prefix,
+     * util the total length requirement is met.
      * @param input
      * @param prefix
      * @param length

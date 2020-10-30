@@ -36,7 +36,8 @@ public class UtilsTest {
     public void hexAndByteTest() {
         assertEquals(new byte[]{15}, Utils.hexToBytes("0F"));
         assertEquals(new byte[]{15,15}, Utils.hexToBytes("0F0f"));
-
         assertEquals(new byte[]{49,50,51}, Utils.AsciiToBytes("123"));
+
+        assertEquals(Utils.bytesToHex(new byte[]{15,15}), "0f0f");
     }
 }
