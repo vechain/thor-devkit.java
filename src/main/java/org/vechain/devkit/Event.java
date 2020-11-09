@@ -20,6 +20,7 @@ import com.google.gson.GsonBuilder;
 
 import org.vechain.devkit.cry.Keccak;
 import org.vechain.devkit.cry.Utils;
+import org.vechain.devkit.types.V1ParamWrapper;
 
 
 public class Event {
@@ -118,20 +119,21 @@ public class Event {
         }
 
         final int start = this.event.isAnonymous() ? 0 : 1;
-        List<byte[]> topicsClone = topics.subList(start, topics.size());
+        // This is a view of the original list.
+        List<byte[]> topicsSlice = topics.subList(start, topics.size());
 
         // A List of "type" information. (iterator)
         TupleType guide = this.event.getIndexedParams();
 
         // Check length
-        if (guide.size() != topicsClone.size()) {
+        if (guide.size() != topicsSlice.size()) {
             throw new RuntimeException("params length doesn't match.");
         }
 
         List<V1ParamWrapper> c = new ArrayList<V1ParamWrapper>();
         int i = 0;
         for (ABIType<?> e: guide) {
-            Object value = decodeSingle(e, topicsClone.get(i), human);
+            Object value = decodeSingle(e, topicsSlice.get(i), human);
             c.add(new V1ParamWrapper(i, e.getName(), e.getCanonicalType(), value));
             i++;
         }

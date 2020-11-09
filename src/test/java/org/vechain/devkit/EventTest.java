@@ -8,8 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.vechain.devkit.cry.Utils;
+import org.vechain.devkit.types.V1ParamWrapper;
 
-// TODO - Seeking more tests.
+// TODO - add more tests.
 
 public class EventTest {
     final static String e1 =

@@ -28,8 +28,7 @@ dependencies {
     implementation 'org.bitcoinj:bitcoinj-core:0.14.7' // Bitcoinj
     implementation 'org.web3j:crypto:5.0.0' // Web3j
     implementation 'org.web3j:core:5.0.0' // Web3j
-    // implementation 'com.esaulpaugh:headlong:3.8.3' // ABI, RLP
-    implementation 'com.esaulpaugh:headlong:4.0.0'
+    implementation 'com.esaulpaugh:headlong:4.0.0' // ABI, RLP
     implementation 'com.google.code.gson:gson:2.8.6' // JSON
 
     // Use TestNG framework, also requires calling test.useTestNG() below

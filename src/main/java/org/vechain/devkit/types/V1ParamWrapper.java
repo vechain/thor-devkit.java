@@ -1,4 +1,4 @@
-package org.vechain.devkit;
+package org.vechain.devkit.types;
 
 // ABI v1 style paramter wrapper.
 // This can be further process into JSON.

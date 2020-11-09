@@ -13,6 +13,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import org.vechain.devkit.cry.Utils;
+import org.vechain.devkit.types.V1ParamWrapper;
 
 /**
  * ABI Function related operations. 1) Initialize a function instance according

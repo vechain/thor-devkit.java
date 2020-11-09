@@ -6,6 +6,7 @@ import java.util.List;
 import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
 import org.vechain.devkit.cry.Utils;
+import org.vechain.devkit.types.V1ParamWrapper;
 
 public class FunctionTest {
     final static String f1 =
