@@ -34,10 +34,13 @@ public class UtilsTest {
 
     @Test
     public void hexAndByteTest() {
+        // "" -> byte[]
+        assertEquals(new byte[]{}, Utils.hexToBytes(""));
+        // "0f" -> byte[]{15}
         assertEquals(new byte[]{15}, Utils.hexToBytes("0F"));
         assertEquals(new byte[]{15,15}, Utils.hexToBytes("0F0f"));
         assertEquals(new byte[]{49,50,51}, Utils.AsciiToBytes("123"));
-
+        // byte[]{15, 15} -> "0f0f"
         assertEquals(Utils.bytesToHex(new byte[]{15,15}), "0f0f");
     }
 }

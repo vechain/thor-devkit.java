@@ -11,54 +11,68 @@ public class NumericKindTest {
     @Test
     public void encode() {
         NumericKind kind = new NumericKind(8); // Max 8 bytes.
+        kind.setValue("0x0");
         assertEquals(
-            Utils.bytesToHex(kind.create("0x0").toBytes()),
+            Utils.bytesToHex(kind.toBytes()),
             ""
         );
+
+        kind.setValue("0x123");
         assertEquals(
-            Utils.bytesToHex(kind.create("0x123").toBytes()),
+            Utils.bytesToHex(kind.toBytes()),
             "0123"
         );
+        kind.setValue("0");
         assertEquals(
-            Utils.bytesToHex(kind.create("0").toBytes()),
+            Utils.bytesToHex(kind.toBytes()),
             ""
         );
+        kind.setValue(0);
         assertEquals(
-            Utils.bytesToHex(kind.create(0).toBytes()),
+            Utils.bytesToHex(kind.toBytes()),
             ""
         );
+        kind.setValue("100");
         assertEquals(
-            Utils.bytesToHex(kind.create("100").toBytes()),
+            Utils.bytesToHex(kind.toBytes()),
             "64"
         );
+        kind.setValue(0x123);
         assertEquals(
-            Utils.bytesToHex(kind.create(0x123).toBytes()),
+            Utils.bytesToHex(kind.toBytes()),
             "0123"
         );
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void nullTest() {
+        NumericKind kind = new NumericKind(8); // Max 8 bytes.
+        kind.toBytes();
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void belowZero() {
         NumericKind kind = new NumericKind(8); // Max 8 bytes.
-        kind.create(-1).toBytes(); // below zero.
+        kind.setValue(-1); // below zero.
     }
 
     @Test(expectedExceptions = NumberFormatException.class)
     public void notHex() {
         NumericKind kind = new NumericKind(8); // Max 8 bytes.
-        kind.create("0x").toBytes(); // 0x is not valid.
+        kind.setValue("0x"); // 0x is not valid.
     }
 
     @Test(expectedExceptions = NumberFormatException.class)
     public void wrongHex() {
         NumericKind kind = new NumericKind(8); // Max 8 bytes.
-        kind.create("0x123z").toBytes(); // z is not hex.
+        kind.setValue("0x123z"); // z is not hex.
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void tooLong() {
         NumericKind kind = new NumericKind(8); // Max 8 bytes.
-        kind.create("0x12345678123456780").toBytes(); // longer than 8.
+        kind.setValue("0x12345678123456780");
+        kind.toBytes(); // longer than 8.
     }
 
     @Test

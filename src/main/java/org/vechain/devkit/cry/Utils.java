@@ -48,6 +48,7 @@ public class Utils {
 
     /**
      * Convert byte[] to its corresponding hex String.
+     * Doesn't have "0x" prepended.
      * 
      * @param input a sequence of bytes
      * @return String the hex representation.
@@ -96,6 +97,8 @@ public class Utils {
 
     /**
      * Convert a string of hex to byte sequence. eg. "FF" to 255, "0f" to 15.
+     * 
+     * No "0x" prefix is allowed.
      * 
      * @param input The input string, must be of even length.
      * @return The byte sequence or raise error.

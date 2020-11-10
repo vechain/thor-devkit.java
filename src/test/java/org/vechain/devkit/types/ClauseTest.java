@@ -5,25 +5,44 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
 
 import java.util.List;
+import java.math.BigInteger;
 import java.util.ArrayList;
 
 public class ClauseTest {
     @Test
-    public void simpleTest() {
+    public void encodeDecode() {
+        // Prepare
         List<Clause> clauses = new ArrayList<Clause>();
-        for (int a = 1; a < 5; a++) {
-            clauses.add(new Clause(Integer.toString(a).repeat(a), a));
+        for (int a = 0; a < 3; a++) {
+            clauses.add(new Clause(
+                "0x7567d83b7b8d80addcb281a71d54fc7b3364ffed",
+                "10000",
+                "0x000000606060"
+            ));
         }
 
-        // [0, 1, 2, ...]
+        // 
         for (Clause c: clauses) {
             // serialize.
             byte[] encoded = c.toRLP();
-            System.out.println(Utils.bytesToHex(encoded));
+
             // deserialize
             Clause decoded = Clause.fromBytes(encoded);
-            System.out.println(decoded.name);
-            System.out.println(decoded.value);
+            
+            assertEquals(
+                decoded.to.toBytes(),
+                Utils.hexToBytes("7567d83b7b8d80addcb281a71d54fc7b3364ffed")
+            );
+
+            assertEquals(
+                decoded.data.toBytes(),
+                Utils.hexToBytes("000000606060")
+            );
+
+            assertEquals(
+                decoded.value.toBytes(), 
+                new BigInteger("10000").toByteArray()
+            );
         }
     }
 }

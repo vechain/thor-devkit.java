@@ -17,13 +17,12 @@ public class NumericKind implements ScalarKind <BigInteger> {
     private int byteLength = 0;
     private BigInteger big = null;
 
-    // byteLength: How long the number shall be.
+    // byteLength: How much bytes the number shall occupy max.
     public NumericKind(int byteLength){
         if (byteLength <=0 || byteLength * 8 > MAX) {
             throw new IllegalArgumentException("Shall be 32 or less.");
         }
         this.byteLength = byteLength;
-        this.big = ZERO;
     }
 
     private void setBig(BigInteger big) {
@@ -52,7 +51,7 @@ public class NumericKind implements ScalarKind <BigInteger> {
     }
 
     // Convenient function.
-    public NumericKind create(String number) {
+    public void setValue(String number) {
         BigInteger b = null;
         if (number.startsWith("0x")) {
             b = new BigInteger(number.substring(2), 16);
@@ -61,19 +60,26 @@ public class NumericKind implements ScalarKind <BigInteger> {
         }
         check(b, this.byteLength);
         this.setBig(b);
-        return this;
     }
 
     // Convenient function.
-    public NumericKind create(long number) {
+    public void setValue(long number) {
         BigInteger b = BigInteger.valueOf(number);
         check(b, this.byteLength);
         this.setBig(b);
-        return this;
+    }
+
+    // Convenient function.
+    public void setValue(BigInteger x) {
+        check(x, this.byteLength);
+        this.setBig(x);
     }
 
     @Override
     public byte[] toBytes() {
+        if (this.big == null) {
+            throw new NullPointerException("Call setValue() before use.");
+        }
         if (this.big.compareTo(ZERO) == 0) {
             return new byte[]{};
         }
@@ -82,12 +88,20 @@ public class NumericKind implements ScalarKind <BigInteger> {
 
     @Override
     public BigInteger fromBytes(byte[] data) {
+        // Validation.
         if (data.length > 0 && data[0] == 0) {
             throw new IllegalArgumentException("Trim the leading zeros, please.");
         }
         // We only deal with zero-positive numbers, hence 1.
         BigInteger b = new BigInteger(1, data);
         check(b, this.byteLength);
+        // Set the internal value.
+        this.big = b;
         return b;
+    }
+
+    @Override
+    public String toString() {
+        return this.big.toString(10);
     }
 }

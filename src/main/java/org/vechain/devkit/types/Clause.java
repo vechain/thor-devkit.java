@@ -1,54 +1,83 @@
 package org.vechain.devkit.types;
 
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import com.esaulpaugh.headlong.rlp.RLPDecoder;
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.rlp.RLPItem;
-import com.esaulpaugh.headlong.util.Integers;
-import com.esaulpaugh.headlong.util.Strings;
+import com.google.gson.Gson;
 
 /**
- * Clause = {int data}
+ * Clause = {
+ *   to:    NullableFixedBlobKind(20)   // to address
+ *   value: NumericKind(32)             // how much vet.
+ *   data:  BlobKind()                  // the call data, if not call data fill in "0x"
+ * }
  */
 public class Clause {
-    public String name;
-    public int value;
+    final NullableFixedBlobKind to = new NullableFixedBlobKind(20);
+    final NumericKind value = new NumericKind(32);
+    final BlobKind data = new BlobKind();
 
-    public Clause(String name, int value) {
-        this.name = name;
-        this.value = value;
+    // Constructor
+    public Clause(String to, String value, String data) {
+        this.to.setValue(to);
+        this.value.setValue(value);
+        this.data.setValue(data);
+    }
+
+    // Constructor
+    public Clause(byte[] to, byte[] value, byte[] data) {
+        this.to.fromBytes(to);
+        this.value.fromBytes(value);
+        this.data.fromBytes(data);
     }
 
     /**
-     * Construct a clause from raw bytes.
+     * Deserialize via RLP from raw bytes to a Clause.
      * @param data
      * @return
      */
     public static Clause fromBytes(byte[] data) {
         Iterator<RLPItem> clause = RLPDecoder.RLP_STRICT.sequenceIterator(data);
         return new Clause(
-            clause.next().asString(Strings.UTF_8),
-            clause.next().asInt()
+            clause.next().asBytes(),
+            clause.next().asBytes(),
+            clause.next().asBytes()
         );
     }
 
     /**
-     * Put each object into bytes, then group them into a list.
+     * Encode each object into bytes, 
+     * then group them into a sequence of list.
      * @return
      */
     public Object[] toObjectArray() {
         return new Object[] {
-            Strings.decode(this.name, Strings.UTF_8),
-            Integers.toBytes(this.value)
+            this.to.toBytes(),
+            this.value.toBytes(),
+            this.data.toBytes()
         };
     }
 
     /**
-     * Encode a group of elements in to findal rlp represented bytes.
+     * Encode the Clause to RLP represented bytes.
      * @return
      */
     public byte[] toRLP() {
         return RLPEncoder.encodeSequentially(toObjectArray());
+    }
+
+    @Override
+    public String toString() {
+        Map<String, String> m = new HashMap<String, String>();
+        m.put("to", "0x" + this.to.toString());
+        m.put("value", this.value.toString());
+        m.put("data", "0x" + this.data.toString());
+
+        Gson gson = new Gson();
+        return gson.toJson(m);
     }
 }
