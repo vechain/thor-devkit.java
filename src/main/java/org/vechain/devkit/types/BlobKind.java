@@ -28,7 +28,7 @@ public class BlobKind implements ScalarKind <String> {
     }
 
     /**
-     * @return "0x..."
+     * @return the hex string with "0x" prefix.
      */
     @Override
     public String fromBytes(byte[] data) {
@@ -37,7 +37,7 @@ public class BlobKind implements ScalarKind <String> {
     }
 
     /**
-     * Directly return the hex string without "0x" prefix.
+     * @return the hex string without "0x" prefix.
      */
     @Override
     public String toString() {

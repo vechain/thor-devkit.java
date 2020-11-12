@@ -14,12 +14,20 @@ public class FixedBlobKind extends BlobKind {
 
     @Override
     public void setValue(String hexString) {
+        // Null check
+        if (hexString == null) {
+            throw new IllegalArgumentException("Can't be null.");
+        }
+        // Strip the "0x".
         String realHex = Utils.remove0x(hexString);
+
+        // Length check.
         if (realHex.length() != byteLength * 2) { // 1 byte = 2 hex chars.
             throw new IllegalArgumentException(
                 String.format("Need %d chars, got %d chars input.", byteLength * 2, realHex.length())
             );
         }
+        // Set it.
         super.setValue(hexString);
     }
 
