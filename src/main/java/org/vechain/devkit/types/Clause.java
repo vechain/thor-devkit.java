@@ -10,6 +10,8 @@ import com.esaulpaugh.headlong.rlp.RLPItem;
 import com.google.gson.Gson;
 
 /**
+ * This is part of the Transaction structure.
+ * 
  * Clause = {
  *   to:    NullableFixedBlobKind(20)   // to address
  *   value: NumericKind(32)             // how much vet.
@@ -17,9 +19,9 @@ import com.google.gson.Gson;
  * }
  */
 public class Clause {
-    final NullableFixedBlobKind to = new NullableFixedBlobKind(20);
-    final NumericKind value = new NumericKind(32);
-    final BlobKind data = new BlobKind();
+    public final NullableFixedBlobKind to = new NullableFixedBlobKind(20);
+    public final NumericKind value = new NumericKind(32);
+    public final BlobKind data = new BlobKind();
 
     // Constructor
     public Clause(String to, String value, String data) {
