@@ -19,6 +19,34 @@ import org.vechain.devkit.types.Clause;
  */
 public class Transaction {
 
+    final List<Clause> clauses;
+
+    public Transaction(List<Clause> clauses){
+        this.clauses = clauses;
+    }
+
+    /**
+     * Construct a Transaction from byte[] data.
+     * @param data
+     * @return
+     */
+    public static Transaction fromBytes(byte[] data) {
+        // byte[] -> tx
+        Iterator<RLPItem> tx = RLPDecoder.RLP_STRICT.sequenceIterator(data);
+        // tx -> clauses
+        byte[] clauses = tx.next().asBytes();
+        // clauses -> fit into Transaction object.
+        List<Clause> myClauses = new ArrayList<Clause>();
+        Iterator<RLPItem> clausesIterator = RLPDecoder.RLP_STRICT.sequenceIterator(clauses);
+        while(clausesIterator.hasNext()){
+            byte[] c = clausesIterator.next().asBytes();
+            Clause clause = Clause.fromBytes(c);
+            myClauses.add(clause);
+        }
+
+        return new Transaction(myClauses);
+    }
+
     /**
      * Calculate the gas used by the data section.
      * 
@@ -90,29 +118,6 @@ public class Transaction {
         }
 
         return sum;
-    }
-
-    final List<Clause> clauses;
-
-    public Transaction(List<Clause> clauses){
-        this.clauses = clauses;
-    }
-
-    public static Transaction fromBytes(byte[] data) {
-        // byte[] -> tx
-        Iterator<RLPItem> tx = RLPDecoder.RLP_STRICT.sequenceIterator(data);
-        // tx -> clauses
-        byte[] clauses = tx.next().asBytes();
-        // clauses -> fit into Transaction object.
-        List<Clause> myClauses = new ArrayList<Clause>();
-        Iterator<RLPItem> clausesIterator = RLPDecoder.RLP_STRICT.sequenceIterator(clauses);
-        while(clausesIterator.hasNext()){
-            byte[] c = clausesIterator.next().asBytes();
-            Clause clause = Clause.fromBytes(c);
-            myClauses.add(clause);
-        }
-
-        return new Transaction(myClauses);
     }
 
     public Object[] toObjectArray() {
