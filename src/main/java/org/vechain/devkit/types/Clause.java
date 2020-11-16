@@ -38,7 +38,7 @@ public class Clause {
     }
 
     /**
-     * Deserialize via RLP from raw bytes to a Clause.
+     * Deserialize RLP raw byte[] to a Clause.
      * @param data
      * @return
      */
@@ -52,8 +52,7 @@ public class Clause {
     }
 
     /**
-     * Encode each object into bytes, 
-     * then group them into a sequence of list.
+     * Encode a Clause into Object[]
      * @return
      */
     public Object[] toObjectArray() {

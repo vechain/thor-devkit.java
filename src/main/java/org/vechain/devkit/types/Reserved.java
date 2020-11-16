@@ -9,7 +9,7 @@ import java.util.List;
  *   unused: List<byte[]>
  * }
  */
-class Reserved {
+public class Reserved {
     final static NumericKind featuresKind = new NumericKind(4);
     private int features;
     private List<byte[]> unused;
@@ -32,8 +32,16 @@ class Reserved {
     }
 
     // If not reserved, create a "not" reserved instance.
-    public static Reserved getNotReserved() {
+    public static Reserved getNullReserved() {
         return new Reserved(0, null);
+    }
+
+    public boolean isNullReserved() {
+        if (this.unused.size() == 0 && this.features == 0) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
