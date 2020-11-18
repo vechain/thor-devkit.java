@@ -3,9 +3,12 @@ package org.vechain.devkit;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
+import com.esaulpaugh.headlong.rlp.RLPDecoder;
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
+import com.esaulpaugh.headlong.rlp.RLPItem;
 
 import org.vechain.devkit.cry.Address;
 import org.vechain.devkit.cry.Blake2b;
@@ -35,16 +38,55 @@ public class Transaction {
     private final static int DELEGATED_MASK = 1;
 
     // member fields.
-    final NumericKind chainTag = new NumericKind(1);
-    final CompactFixedBlobKind blockRef = new CompactFixedBlobKind(8);
-    final NumericKind expiration = new NumericKind(4);
-    final Clause[] clauses;
-    final NumericKind gasPriceCoef = new NumericKind(1);
-    final NumericKind gas = new NumericKind(8);
-    final NullableFixedBlobKind dependsOn = new NullableFixedBlobKind(32);
-    final NumericKind nonce = new NumericKind(8);
-    final Reserved reserved;
-    private byte[] signature = null; // only signed transaction has signature.
+    NumericKind chainTag = new NumericKind(1);
+    CompactFixedBlobKind blockRef = new CompactFixedBlobKind(8);
+    NumericKind expiration = new NumericKind(4);
+    Clause[] clauses;
+    NumericKind gasPriceCoef = new NumericKind(1);
+    NumericKind gas = new NumericKind(8);
+    NullableFixedBlobKind dependsOn = new NullableFixedBlobKind(32);
+    NumericKind nonce = new NumericKind(8);
+    Reserved reserved;
+    byte[] signature = null; // only signed transaction has signature.
+
+    private Transaction(
+        byte[] chainTag,
+        byte[] blockRef,
+        byte[] expiration,
+        List<byte[]> clauses,
+        byte[] gasPriceCoef,
+        byte[] gas,
+        byte[] dependsOn,
+        byte[] nonce,
+        List<byte[]> reserved
+    ){
+        this.chainTag.fromBytes(chainTag);
+        this.blockRef.fromBytes(blockRef);
+        this.expiration.fromBytes(expiration);
+        
+        List<Clause> _clauses = new ArrayList<Clause>();
+        for (byte[] c: clauses) {
+            _clauses.add(Clause.decode(c));
+        }
+        Clause[] temp = new Clause[_clauses.size()];
+        temp = _clauses.toArray(temp);
+        this.clauses = temp;
+        
+        this.gasPriceCoef.fromBytes(gasPriceCoef);
+        this.gas.fromBytes(gas);
+        this.dependsOn.fromBytes(dependsOn);
+        this.nonce.fromBytes(nonce);
+        if (reserved != null){
+            if (reserved.size() > 0) {
+                this.reserved = Reserved.unpack(reserved);
+            } else {
+                this.reserved = Reserved.getNullReserved();
+            }
+        } else {
+            this.reserved = Reserved.getNullReserved();
+        }
+        
+    }
 
     /**
      * Construct a Transaction.
@@ -73,7 +115,7 @@ public class Transaction {
         this.blockRef.setValue(blockRef);
         this.expiration.setValue(expiration);
 
-        if (clauses == null || clauses.length == 0) {
+        if (clauses == null) {
             throw new IllegalArgumentException("Fill in the clauses, please.");
         } else {
             this.clauses = clauses;
@@ -232,10 +274,10 @@ public class Transaction {
     }
 
     /**
-     * Put the objects bytes in a fixed order.
+     * Pack the objects bytes in a fixed order.
      * @return
      */
-    List<Object> getUnsignedTxBody() {
+    List<Object> packUnsignedTxBody() {
         // Prepare reserved.
         List<byte[]> _reserved = this.reserved.pack();
         // Prepare clauses.
@@ -266,7 +308,7 @@ public class Transaction {
      */
     public byte[] getSigningHash(String delegateFor) {
         // Get a unsigned Tx body as an array.
-        Object[] unsignedTxBody = this.getUnsignedTxBody().toArray();
+        Object[] unsignedTxBody = this.packUnsignedTxBody().toArray();
         // RLP encode them to bytes.
         byte[] buff = RLPEncoder.encodeAsList(unsignedTxBody);
         // Hash it.
@@ -406,13 +448,14 @@ public class Transaction {
      * @return
      */
     public byte[] encode() {
-        List<Object> unsignedTxBody = this.getUnsignedTxBody();
+        List<Object> unsignedTxBody = this.packUnsignedTxBody();
 
-         // append the sig bytes.
+         // Pack more: append the sig bytes at the end.
         if (this.getSignature() != null) {
             unsignedTxBody.add(this.getSignature());
         }
 
+        // RLP encode the packed body.
         return RLPEncoder.encodeAsList(unsignedTxBody);
     }
 
@@ -421,22 +464,72 @@ public class Transaction {
      * 1) Tx can be signed,
      * 2) Tx can be unsigned.
      * @param data
+     * @param unsigned
      * @return
      */
-    // public static Transaction decode(byte[] data) {
-    //     // byte[] -> tx
-    //     Iterator<RLPItem> tx = RLPDecoder.RLP_STRICT.sequenceIterator(data);
-    //     // tx -> clauses
-    //     byte[] clauses = tx.next().asBytes();
-    //     // clauses -> fit into Transaction object.
-    //     List<Clause> myClauses = new ArrayList<Clause>();
-    //     Iterator<RLPItem> clausesIterator = RLPDecoder.RLP_STRICT.sequenceIterator(clauses);
-    //     while(clausesIterator.hasNext()){
-    //         byte[] c = clausesIterator.next().asBytes();
-    //         Clause clause = Clause.decode(c);
-    //         myClauses.add(clause);
-    //     }
+    public static Transaction decode(byte[] data, boolean unsigned) {
+        // byte[] -> tx
+        Iterator<RLPItem> l = RLPDecoder.RLP_STRICT.listIterator(data);
 
-    //     return new Transaction(myClauses);
-    // }
+        byte[] _chainTag = l.next().asBytes();
+        byte[] _blockRef = l.next().asBytes();
+        byte[] _expiration = l.next().asBytes();
+
+        byte[] _clausesSection = l.next().asBytes();
+        Iterator<RLPItem> clausesIterator = RLPDecoder.RLP_STRICT.sequenceIterator(_clausesSection);
+        List<byte[]> _clauses = new ArrayList<byte[]>();
+        while(clausesIterator.hasNext()){
+            _clauses.add(clausesIterator.next().asBytes());
+        }
+
+        byte[] _gasPriceCoef = l.next().asBytes();
+        byte[] _gas = l.next().asBytes();
+        byte[] _dependsOn = l.next().asBytes();
+        byte[] _nonce = l.next().asBytes();
+
+        byte[] _reservedSection = l.next().asBytes();
+        Iterator<RLPItem> reservedIterator = RLPDecoder.RLP_STRICT.sequenceIterator(_reservedSection);
+        List<byte[]> _reserved = new ArrayList<byte[]>();
+        while(reservedIterator.hasNext()) {
+            _reserved.add(clausesIterator.next().asBytes());
+        }
+
+        Transaction x = new Transaction(
+            _chainTag,
+            _blockRef,
+            _expiration,
+            _clauses,
+            _gasPriceCoef,
+            _gas,
+            _dependsOn,
+            _nonce,
+            _reserved
+        );
+
+        if (!unsigned) {
+            byte[] sig = l.next().asBytes();
+            x.setSignature(sig);
+        }
+
+        return x;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+
+        if (other == this) { 
+            return true; 
+        } 
+
+        if (!(other instanceof Transaction)) { 
+            return false; 
+        }
+
+        Transaction that = (Transaction) other;
+
+        boolean flag1 = Arrays.equals(this.getSignature(), that.getSignature());
+        boolean flag2 = Arrays.equals(this.encode(), that.encode());
+
+        return flag1 && flag2;
+    }
 }

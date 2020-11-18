@@ -23,14 +23,14 @@ public class Clause {
     public final NumericKind value = new NumericKind(32);
     public final BlobKind data = new BlobKind();
 
-    // Constructor
+    // Constructor: This is user friendly.
     public Clause(String to, String value, String data) {
         this.to.setValue(to);
         this.value.setValue(value);
         this.data.setValue(data);
     }
 
-    // Constructor
+    // Constructor: This is usually used by machine.
     public Clause(byte[] to, byte[] value, byte[] data) {
         this.to.fromBytes(to);
         this.value.fromBytes(value);
