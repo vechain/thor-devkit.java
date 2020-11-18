@@ -1,6 +1,7 @@
 package org.vechain.devkit.types;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 
 // int:     32-bit/4-byte
 // long:    64-bit/8-byte
@@ -83,7 +84,27 @@ public class NumericKind implements ScalarKind <BigInteger> {
         if (this.big.compareTo(ZERO) == 0) {
             return new byte[]{};
         }
-        return this.big.toByteArray();
+
+        byte[] m = this.big.toByteArray();
+
+        int first_non_zero_index = -1;
+        for (int i = 0; i < m.length; i++) {
+            if (m[i] != 0) {
+                first_non_zero_index = i;
+                break;
+            }
+        }
+
+        byte[] n = null;
+        if (first_non_zero_index != -1) {
+            n = Arrays.copyOfRange(m, first_non_zero_index, m.length);
+        }
+
+        if (n != null) {
+            return n;
+        } else {
+            return new byte[]{};
+        }
     }
 
     @Override

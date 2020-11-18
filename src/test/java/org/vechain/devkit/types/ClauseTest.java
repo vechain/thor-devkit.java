@@ -24,10 +24,10 @@ public class ClauseTest {
         // 
         for (Clause c: clauses) {
             // serialize.
-            byte[] encoded = c.toRLP();
+            byte[] encoded = c.encode();
 
             // deserialize
-            Clause decoded = Clause.fromBytes(encoded);
+            Clause decoded = Clause.decode(encoded);
             
             assertEquals(
                 decoded.to.toBytes(),

@@ -3,17 +3,10 @@ package org.vechain.devkit;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
-import com.esaulpaugh.headlong.rlp.RLPDecoder;
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
-import com.esaulpaugh.headlong.rlp.RLPItem;
-import com.google.gson.Gson;
 
-import org.bitcoinj.protocols.payments.PaymentProtocolException.Expired;
 import org.vechain.devkit.cry.Address;
 import org.vechain.devkit.cry.Blake2b;
 import org.vechain.devkit.cry.Secp256k1;
@@ -21,9 +14,6 @@ import org.vechain.devkit.cry.Utils;
 import org.vechain.devkit.types.Clause;
 import org.vechain.devkit.types.NumericKind;
 import org.vechain.devkit.types.Reserved;
-
-import jdk.tools.jlink.internal.plugins.ExcludePlugin;
-
 import org.vechain.devkit.types.CompactFixedBlobKind;
 import org.vechain.devkit.types.NullableFixedBlobKind;
 
@@ -48,7 +38,7 @@ public class Transaction {
     final NumericKind chainTag = new NumericKind(1);
     final CompactFixedBlobKind blockRef = new CompactFixedBlobKind(8);
     final NumericKind expiration = new NumericKind(4);
-    final List<Clause> clauses;
+    final Clause[] clauses;
     final NumericKind gasPriceCoef = new NumericKind(1);
     final NumericKind gas = new NumericKind(8);
     final NullableFixedBlobKind dependsOn = new NullableFixedBlobKind(32);
@@ -72,7 +62,7 @@ public class Transaction {
         String chainTag,
         String blockRef,
         String expiration,
-        List<Clause> clauses, // don't be null.
+        Clause[] clauses, // don't be null.
         String gasPriceCoef,
         String gas,
         String dependsOn, // can be null
@@ -83,7 +73,7 @@ public class Transaction {
         this.blockRef.setValue(blockRef);
         this.expiration.setValue(expiration);
 
-        if (clauses == null || clauses.size() == 0) {
+        if (clauses == null || clauses.length == 0) {
             throw new IllegalArgumentException("Fill in the clauses, please.");
         } else {
             this.clauses = clauses;
@@ -100,10 +90,12 @@ public class Transaction {
         }
     }
 
+    // Get Tx signature.
     public byte[] getSignature() {
         return this.signature;
     }
 
+    // Set Tx signature.
     public void setSignature(byte[] data) {
         this.signature = data;
     }
@@ -147,7 +139,7 @@ public class Transaction {
      * @param clauses A list of clauses.
      * @return
      */
-    static int calcIntrinsicGas(List<Clause> clauses) {
+    static int calcIntrinsicGas(Clause[] clauses) {
         final int TX_GAS = 5000;
         final int CLAUSE_GAS = 16000;
         final int CLAUSE_CONTRACT_CREATION = 48000;
@@ -158,7 +150,7 @@ public class Transaction {
         }
 
         // Must pay a static fee even empty!
-        if (clauses.size() == 0) {
+        if (clauses.length == 0) {
             return TX_GAS + CLAUSE_GAS;
         }
 
@@ -220,6 +212,10 @@ public class Transaction {
         }
     }
 
+    /**
+     * Check if the signature is valid.
+     * @return
+     */
     private boolean isSignatureValid(){
         int expectedSignatureLength;
         if (this.isDelegated()){
@@ -236,17 +232,16 @@ public class Transaction {
     }
 
     /**
-     * Compute the hash result to be signed.
-     * @param delegateFor "0x..." the address to delegate for him. or null.
+     * Put the objects bytes in a fixed order.
      * @return
      */
-    public byte[] getSigningHash(String delegateFor) {
+    List<Object> getUnsignedTxBody() {
         // Prepare reserved.
-        List<byte[]> _reserved = this.reserved.encode();
+        List<byte[]> _reserved = this.reserved.pack();
         // Prepare clauses.
-        List<byte[]> _clauses = new ArrayList<byte[]>();
-        for (Clause x: this.clauses) {
-            _clauses.add(x.toRLP());
+        List<Object[]> _clauses = new ArrayList<Object[]>();
+        for (Clause c: this.clauses) {
+            _clauses.add(c.pack());
         }
         // Prepare unsigned tx.
         Object[] unsignedBody = new Object[] {
@@ -260,8 +255,20 @@ public class Transaction {
             this.nonce.toBytes(),
             _reserved
         };
+
+        return new ArrayList<Object>(Arrays.asList(unsignedBody));
+    }
+
+    /**
+     * Compute the hash result to be signed.
+     * @param delegateFor "0x..." the address to delegate for him or null.
+     * @return
+     */
+    public byte[] getSigningHash(String delegateFor) {
+        // Get a unsigned Tx body as an array.
+        Object[] unsignedTxBody = this.getUnsignedTxBody().toArray();
         // RLP encode them to bytes.
-        byte[] buff = RLPEncoder.encodeSequentially(unsignedBody);
+        byte[] buff = RLPEncoder.encodeAsList(unsignedTxBody);
         // Hash it.
         byte[] h = Blake2b.blake2b256(buff);
 
@@ -270,9 +277,9 @@ public class Transaction {
                 throw new IllegalArgumentException("delegateFor should be address type.");
             }
             return Blake2b.blake2b256(h, Utils.hexToBytes(delegateFor.substring(2)));
+        } else {
+            return h;
         }
-
-        return h;
     }
 
     /**
@@ -365,7 +372,7 @@ public class Transaction {
     }
 
     /**
-     * Calculate Tx id.
+     * Calculate Tx id (32 bytes).
      * @return or null.
      */
     public byte[] getId() {
@@ -386,7 +393,7 @@ public class Transaction {
     }
 
     /**
-     * Get TX id as "0x..." (32 bytes)
+     * Get TX id as "0x..." = 2 chars 0x + 64 chars hex
      * @return or null.
      */
     public String getIdAsString() {
@@ -395,58 +402,41 @@ public class Transaction {
     }
 
     /**
-     * Construct a Transaction from byte[] data.
+     * Encode a tx into bytes.
+     * @return
+     */
+    public byte[] encode() {
+        List<Object> unsignedTxBody = this.getUnsignedTxBody();
+
+         // append the sig bytes.
+        if (this.getSignature() != null) {
+            unsignedTxBody.add(this.getSignature());
+        }
+
+        return RLPEncoder.encodeAsList(unsignedTxBody);
+    }
+
+    /**
+     * Decode a tx from byte[] data.
+     * 1) Tx can be signed,
+     * 2) Tx can be unsigned.
      * @param data
      * @return
      */
-    public static Transaction fromBytes(byte[] data) {
-        // byte[] -> tx
-        Iterator<RLPItem> tx = RLPDecoder.RLP_STRICT.sequenceIterator(data);
-        // tx -> clauses
-        byte[] clauses = tx.next().asBytes();
-        // clauses -> fit into Transaction object.
-        List<Clause> myClauses = new ArrayList<Clause>();
-        Iterator<RLPItem> clausesIterator = RLPDecoder.RLP_STRICT.sequenceIterator(clauses);
-        while(clausesIterator.hasNext()){
-            byte[] c = clausesIterator.next().asBytes();
-            Clause clause = Clause.fromBytes(c);
-            myClauses.add(clause);
-        }
+    // public static Transaction decode(byte[] data) {
+    //     // byte[] -> tx
+    //     Iterator<RLPItem> tx = RLPDecoder.RLP_STRICT.sequenceIterator(data);
+    //     // tx -> clauses
+    //     byte[] clauses = tx.next().asBytes();
+    //     // clauses -> fit into Transaction object.
+    //     List<Clause> myClauses = new ArrayList<Clause>();
+    //     Iterator<RLPItem> clausesIterator = RLPDecoder.RLP_STRICT.sequenceIterator(clauses);
+    //     while(clausesIterator.hasNext()){
+    //         byte[] c = clausesIterator.next().asBytes();
+    //         Clause clause = Clause.decode(c);
+    //         myClauses.add(clause);
+    //     }
 
-        return new Transaction(myClauses);
-    }
-
-    /**
-     * Transaction -> Object[]
-     * @return
-     */
-    public Object[] toObjectArray() {
-
-        List<byte[]> cls = new ArrayList<byte[]>();
-        for (Clause x: this.clauses) {
-            cls.add(x.toRLP());
-        }
-        return new Object[] {
-            cls
-        };
-    }
-
-    /**
-     * Transaction -> Object[] -> byte[]
-     * @return
-     */
-    public byte[] toRLP() {
-        return RLPEncoder.encodeSequentially(toObjectArray());
-    }
-
-    /**
-     * Pretty print.
-     */
-    @Override
-    public String toString() {
-        Map<String, Object> m = new HashMap<String, Object>();
-        m.put("clauses", this.clauses);
-        Gson gson = new Gson();
-        return gson.toJson(m);
-    }
+    //     return new Transaction(myClauses);
+    // }
 }

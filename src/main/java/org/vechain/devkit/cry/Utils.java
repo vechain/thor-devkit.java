@@ -1,6 +1,7 @@
 package org.vechain.devkit.cry;
 
 import java.util.Arrays;
+import java.util.List;
 import java.security.SecureRandom;
 import com.google.common.base.Charsets;
 
@@ -142,5 +143,40 @@ public class Utils {
         byte[] result = new byte[length];
         sr.nextBytes(result);
         return result;
+    }
+
+    // [byte[], byte[], [byte[], byte[]]]
+    public static void prettyPrint(Object[] raw, int indent) {
+        final int internalIndent = 2;
+        System.out.println(" ".repeat(indent) + "[");
+        for (Object o : raw) {
+            // bytes? print it!
+            if (o instanceof byte[]) {
+                if (((byte[]) o).length > 0) {
+                    System.out.println(" ".repeat(indent + internalIndent) + bytesToHex((byte[])o));
+                } else {
+                    System.out.println(" ".repeat(indent + internalIndent) + "(empty byte[])");
+                }
+            }
+            // A list of bytes? Rabbit hole.
+            if (o instanceof List<?>) { // List<byte[]>
+                List<byte[]> x = (List<byte[]>) o;
+                prettyPrint(x.toArray(), indent+internalIndent);
+            }
+            // An array of bytes? rabbit hole.
+            if (o instanceof Object[]) {
+                prettyPrint((Object[]) o, indent+internalIndent);
+            }
+        }
+        System.out.println(" ".repeat(indent) + "]");
+    }
+
+    // byte[]
+    public static void prettyPrint(byte[] raw, int indent) {
+        if (raw.length > 0) {
+            System.out.println(" ".repeat(indent) + bytesToHex(raw));
+        } else {
+            System.out.println(" ".repeat(indent) + "**empty byte[]**");
+        }
     }
 }

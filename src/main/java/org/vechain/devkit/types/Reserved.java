@@ -45,10 +45,10 @@ public class Reserved {
     }
 
     /**
-     * Encode the Reserved into a List<byte[]>
+     * Pack the Reserved into a List<byte[]>
      * @return
      */
-    public List<byte[]> encode() {
+    public List<byte[]> pack() {
         List<byte[]> mList = new ArrayList<byte[]>();
         featuresKind.setValue(this.features);
         mList.add(featuresKind.toBytes());
@@ -80,11 +80,11 @@ public class Reserved {
     }
 
     /**
-     * Decode the Reserved from a group of byte[].
+     * Unpack the Reserved from a group of byte[].
      * @param data
      * @return Instance of Reserved or null.
      */
-    public static Reserved decode(List<byte[]> data) {
+    public static Reserved unpack(List<byte[]> data) {
         List<byte[]> r = new ArrayList<byte[]>();
         if (data != null) {
             r = data;

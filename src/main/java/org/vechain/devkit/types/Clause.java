@@ -38,11 +38,11 @@ public class Clause {
     }
 
     /**
-     * Deserialize RLP raw byte[] to a Clause.
+     * Deserialize via RLP a raw byte[] to a Clause.
      * @param data
      * @return
      */
-    public static Clause fromBytes(byte[] data) {
+    public static Clause decode(byte[] data) {
         Iterator<RLPItem> clause = RLPDecoder.RLP_STRICT.sequenceIterator(data);
         return new Clause(
             clause.next().asBytes(),
@@ -52,10 +52,10 @@ public class Clause {
     }
 
     /**
-     * Encode a Clause into Object[]
+     * Pack a Clause into Object[]
      * @return
      */
-    public Object[] toObjectArray() {
+    public Object[] pack() {
         return new Object[] {
             this.to.toBytes(),
             this.value.toBytes(),
@@ -65,10 +65,12 @@ public class Clause {
 
     /**
      * Encode the Clause to RLP represented bytes.
+     * 1) pack
+     * 2) to RLP
      * @return
      */
-    public byte[] toRLP() {
-        return RLPEncoder.encodeSequentially(toObjectArray());
+    public byte[] encode() {
+        return RLPEncoder.encodeSequentially(pack());
     }
 
     @Override
