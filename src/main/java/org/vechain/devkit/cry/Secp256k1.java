@@ -95,9 +95,10 @@ public class Secp256k1 {
         ECDSASignature sig = pair.sign(messageHash);
 
         int found = -1;
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 2; i++) {
             byte[] pub = recover(messageHash, sig, i);
-            if (pub != null) {
+            byte[] pubExpected = derivePublicKey(priv, false);
+            if (java.util.Arrays.equals(pub, pubExpected)) {
                 found = i;
                 break;
             }

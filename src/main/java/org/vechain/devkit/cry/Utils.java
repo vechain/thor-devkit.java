@@ -152,11 +152,7 @@ public class Utils {
         for (Object o : raw) {
             // bytes? print it!
             if (o instanceof byte[]) {
-                if (((byte[]) o).length > 0) {
-                    System.out.println(" ".repeat(indent + internalIndent) + bytesToHex((byte[])o));
-                } else {
-                    System.out.println(" ".repeat(indent + internalIndent) + "(empty byte[])");
-                }
+                prettyPrint((byte[]) o, indent + internalIndent);
             }
             // A list of bytes? Rabbit hole.
             if (o instanceof List<?>) { // List<byte[]>
@@ -176,7 +172,7 @@ public class Utils {
         if (raw.length > 0) {
             System.out.println(" ".repeat(indent) + bytesToHex(raw));
         } else {
-            System.out.println(" ".repeat(indent) + "**empty byte[]**");
+            System.out.println(" ".repeat(indent) + "(empty byte[])");
         }
     }
 }

@@ -47,8 +47,12 @@ public class Transaction {
     NullableFixedBlobKind dependsOn = new NullableFixedBlobKind(32);
     NumericKind nonce = new NumericKind(8);
     Reserved reserved;
-    byte[] signature = null; // only signed transaction has signature.
 
+    // Set this member later.
+    // Only signed transaction has signature.
+    byte[] signature = null;
+
+    // Don't expose.
     private Transaction(
         byte[] chainTag,
         byte[] blockRef,
@@ -140,6 +144,25 @@ public class Transaction {
     // Set Tx signature.
     public void setSignature(byte[] data) {
         this.signature = data;
+    }
+
+    // non-visible to users. For debug only.
+    void setClauses(Clause[] clauses) {
+        this.clauses = clauses;
+    }
+
+    // non-visible to users. For debug only.
+    void setReserved(Reserved reserved) {
+        if (reserved == null) {
+            this.reserved = Reserved.getNullReserved();
+        } else {
+            this.reserved = reserved;
+        }
+    }
+
+    // non-visible to users. For debug only.
+    Reserved getReserved() {
+        return this.reserved;
     }
 
     /**
@@ -335,10 +358,8 @@ public class Transaction {
 
         try {
             byte[] h = this.getSigningHash(null);
-            byte[] pubKey = Secp256k1.recover(
-                h, 
-                Arrays.copyOfRange(this.getSignature(), 0, 65)
-            );
+            byte[] sig = Arrays.copyOfRange(this.getSignature(), 0, 65);
+            byte[] pubKey = Secp256k1.recover(h, sig);
             return pubKey;
         } catch (Exception e) {
             return null;
@@ -352,7 +373,7 @@ public class Transaction {
      */
     public String getOriginAsAddressString(){
         byte[] pubKey = this.getOriginAsPublicKey();
-        return pubKey == null ? null : "0x" + Address.publicKeyToAddressString(pubKey);
+        return pubKey == null ? null : Address.publicKeyToAddressString(pubKey);
     }
 
     /**
@@ -385,11 +406,8 @@ public class Transaction {
 
         try {
             byte[] h = this.getSigningHash(origin);
-            byte[] pubKey = Secp256k1.recover(
-                h,
-                Arrays.copyOfRange(this.getSignature(), 65, this.getSignature().length + 1));
-            
-            return pubKey;
+            byte[] sig = Arrays.copyOfRange(this.getSignature(), 65, this.getSignature().length);
+            return Secp256k1.recover(h,sig);
         } catch (Exception e) {
             return null;
         }
@@ -423,10 +441,8 @@ public class Transaction {
         }
         try {
             byte[] h = this.getSigningHash(null);
-            byte[] pubKey = Secp256k1.recover(
-                h,
-                Arrays.copyOfRange(this.getSignature(), 0, 65)
-            );
+            byte[] sig = Arrays.copyOfRange(this.getSignature(), 0, 65);
+            byte[] pubKey = Secp256k1.recover(h, sig);
             byte[] addressBytes = Address.publicKeyToAddressBytes(pubKey);
             return Blake2b.blake2b256(h, addressBytes);
         } catch (Exception e) {
@@ -468,7 +484,7 @@ public class Transaction {
      * @return
      */
     public static Transaction decode(byte[] data, boolean unsigned) {
-        // byte[] -> tx
+
         Iterator<RLPItem> l = RLPDecoder.RLP_STRICT.listIterator(data);
 
         byte[] _chainTag = l.next().asBytes();
@@ -491,7 +507,7 @@ public class Transaction {
         Iterator<RLPItem> reservedIterator = RLPDecoder.RLP_STRICT.sequenceIterator(_reservedSection);
         List<byte[]> _reserved = new ArrayList<byte[]>();
         while(reservedIterator.hasNext()) {
-            _reserved.add(clausesIterator.next().asBytes());
+            _reserved.add(reservedIterator.next().asBytes());
         }
 
         Transaction x = new Transaction(
@@ -531,5 +547,14 @@ public class Transaction {
         boolean flag2 = Arrays.equals(this.encode(), that.encode());
 
         return flag1 && flag2;
+    }
+
+    /**
+     * Clone current tx into a standalone object.
+     * @return
+     */
+    public Transaction clone() {
+        boolean unsigned = this.getSignature() == null;
+        return Transaction.decode(this.encode(), unsigned);
     }
 }

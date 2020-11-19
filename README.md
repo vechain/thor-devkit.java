@@ -14,8 +14,8 @@ Java (8+) library to assist smooth development on VeChain for developers and hob
 | Signing messages.                                                |
 | Verify signature of messages.                                    |
 | Bloom filter.                                                    |
-| Transaction Assembling (**Multi-task Transaction, MTT**). (TODO) |
-| Fee Delegation Transaction (**VIP-191**). (TODO)                 |
+| Transaction Assembling (**Multi-task Transaction, MTT**). |
+| Fee Delegation Transaction (**VIP-191**).                  |
 | Self-signed Certificate (**VIP-192**). (TODO)                    |
 | ABI decoding of "functions" and "events" in logs.          |
 

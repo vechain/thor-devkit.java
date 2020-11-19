@@ -103,7 +103,7 @@ public class Reserved {
         int features = featuresKind.fromBytes(r.get(0)).intValue();
         // Decode the unused. (simply copy the rest of the items)
         if (r.size() > 1) {
-            return new Reserved(features, r.subList(1, r.size()+1));
+            return new Reserved(features, r.subList(1, r.size()));
         } else { // r.size() == 1, so no unused followed.
             return new Reserved(features, null);
         }

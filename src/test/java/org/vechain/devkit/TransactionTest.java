@@ -5,39 +5,45 @@ import org.vechain.devkit.cry.Address;
 import org.vechain.devkit.cry.Blake2b;
 import org.vechain.devkit.cry.Secp256k1;
 import org.vechain.devkit.types.Clause;
-
+import org.vechain.devkit.types.Reserved;
 import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
 
+import java.util.Arrays;
+
+import com.google.common.primitives.Bytes;
+
 public class TransactionTest {
+
+    final static Clause[] clauses = new Clause[]{
+        new Clause(
+            "0x7567d83b7b8d80addcb281a71d54fc7b3364ffed",
+            "10000",
+            "0x000000606060"
+        ),
+        new Clause(
+            "0x7567d83b7b8d80addcb281a71d54fc7b3364ffed",
+            "20000",
+            "0x000000606060"
+        )
+    };
+
+    final static Transaction transaction = new Transaction(
+        "1",
+        "0x00000000aabbccdd",
+        "32",
+        clauses,
+        "128",
+        "21000",
+        null,
+        "12345678",
+        null
+    );
 
     @Test
     public void encodeUnsignedTx() {
 
-        Clause[] clauses = new Clause[]{
-            new Clause(
-                "0x7567d83b7b8d80addcb281a71d54fc7b3364ffed",
-                "10000",
-                "0x000000606060"
-            ),
-            new Clause(
-                "0x7567d83b7b8d80addcb281a71d54fc7b3364ffed",
-                "20000",
-                "0x000000606060"
-            )
-        };
-
-        Transaction tx = new Transaction(
-            "1",
-            "0x00000000aabbccdd",
-            "32",
-            clauses,
-            "128",
-            "21000",
-            null,
-            "12345678",
-            null
-        );
+        Transaction tx = transaction.clone();
 
         // Uncomment below line for debugging.
         // Utils.prettyPrint(tx.getUnsignedTxBody().toArray(), 0);
@@ -61,19 +67,11 @@ public class TransactionTest {
     }
 
     @Test
-    public void encodeEmptyClauseTx() {
-        Clause[] clauses = new Clause[]{};
-        Transaction tx = new Transaction(
-            "1",
-            "0x00000000aabbccdd",
-            "32",
-            clauses,
-            "128",
-            "21000",
-            null,
-            "12345678",
-            null
-        );
+    public void encodeEmptyClausesTx() {
+        Transaction tx = transaction.clone();
+        // empty clauses!
+        tx.setClauses(new Clause[]{});
+
         assertEquals(
             tx.getIntrinsicGas(),
             21000
@@ -81,7 +79,7 @@ public class TransactionTest {
     }
 
     @Test
-    public void encodeOneClauseTx() {
+    public void encodeOneClauseEmptyDataTx() {
         Clause[] clauses = new Clause[]{
             new Clause(
                 null,
@@ -89,17 +87,10 @@ public class TransactionTest {
                 "0x" // data = 0x
             )
         };
-        Transaction tx = new Transaction(
-            "1",
-            "0x00000000aabbccdd",
-            "32",
-            clauses,
-            "128",
-            "21000",
-            null,
-            "12345678",
-            null
-        );
+        
+        Transaction tx = transaction.clone();
+        tx.setClauses(clauses);
+
         assertEquals(
             tx.getIntrinsicGas(),
             53000
@@ -110,30 +101,8 @@ public class TransactionTest {
 
     @Test
     public void signedTx() {
-        Clause[] clauses = new Clause[]{
-            new Clause(
-                "0x7567d83b7b8d80addcb281a71d54fc7b3364ffed",
-                "10000",
-                "0x000000606060"
-            ),
-            new Clause(
-                "0x7567d83b7b8d80addcb281a71d54fc7b3364ffed",
-                "20000",
-                "0x000000606060"
-            )
-        };
 
-        Transaction tx = new Transaction(
-            "1",
-            "0x00000000aabbccdd",
-            "32",
-            clauses,
-            "128",
-            "21000",
-            null,
-            "12345678",
-            null
-        );
+        Transaction tx = transaction.clone();
 
         byte[] privateKey = Utils.hexToBytes("7582be841ca040aa940fff6c05773129e135623e41acce3e0b8ba520dc1ae26a");
         byte[] h = Blake2b.blake2b256(tx.encode());
@@ -171,26 +140,78 @@ public class TransactionTest {
         byte[] encodedTx = Utils.hexToBytes("f8970184aabbccdd20f840df947567d83b7b8d80addcb281a71d54fc7b3364ffed82271086000000606060df947567d83b7b8d80addcb281a71d54fc7b3364ffed824e208600000060606081808252088083bc614ec0b841f76f3c91a834165872aa9464fc55b03a13f46ea8d3b858e528fcceaf371ad6884193c3f313ff8effbb57fe4d1adc13dceb933bedbf9dbb528d2936203d5511df00");
         Transaction tx1 = Transaction.decode(encodedTx, false);
 
-        // also: tx1.equals(tx);
+        // See: tx1.equals(tx);
         assertEquals(tx1, tx);
     }
 
     @Test
     public void incorrectlySigned() {
-        Clause[] clauses = new Clause[]{};
-        Transaction tx = new Transaction(
-            "1",
-            "0x00000000aabbccdd",
-            "32",
-            clauses,
-            "128",
-            "21000",
-            null,
-            "12345678",
-            null
-        );
+        Transaction tx = transaction.clone();
         tx.setSignature(new byte[]{1,2,3}); // wrong signature.
         assertEquals(tx.getOriginAsPublicKey(), null);
         assertEquals(tx.getId(), null);
+    }
+
+    @Test
+    public void cloneTest() {
+        Transaction tx = transaction.clone();
+        assertEquals(tx, transaction);
+    }
+
+
+    @Test
+    public void features() {
+        Transaction tx = transaction.clone();
+        Reserved reserved = new Reserved(1, Arrays.asList(new byte[][]{
+            Utils.hexToBytes("1234")
+        }));
+        tx.setReserved(reserved);
+
+        assertEquals(tx.isDelegated(), true);
+
+        // Sender
+        byte[] priv_1 = Utils.hexToBytes("58e444d4fe08b0f4d9d86ec42f26cf15072af3ddc29a78e33b0ceaaa292bcf6b");
+        byte[] addr_1 = Address.publicKeyToAddressBytes(Secp256k1.derivePublicKey(priv_1, false));
+
+        // Gas Payer
+        byte[] priv_2 = Utils.hexToBytes("0bfd6a863f347f4ef2cf2d09c3db7b343d84bb3e6fc8c201afee62de6381dc65");
+        byte[] addr_2 = Address.publicKeyToAddressBytes(Secp256k1.derivePublicKey(priv_2, false));
+
+        // Sender sign the message himself.
+        byte[] h = tx.getSigningHash(null);
+        byte[] senderHash = Secp256k1.sign(h, priv_1);
+
+        // Gas payer sign the hash for the sender.
+        byte[] dh = tx.getSigningHash("0x" + Utils.bytesToHex(addr_1));
+        byte[] payerHash = Secp256k1.sign(dh, priv_2);
+
+        // Assemble signature
+        byte[] sig = Bytes.concat(senderHash, payerHash);
+        assertEquals(sig.length, 65 * 2);
+
+        // Set the signature onto the tx.
+        tx.setSignature(sig);
+
+        assertEquals(
+            tx.getOriginAsAddressBytes(),
+            addr_1
+        );
+
+        assertEquals(
+            tx.getDeleagtorAsAddressBytes(),
+            addr_2
+        );
+    }
+
+    @Test
+    public void unused() {
+        Transaction tx = transaction.clone();
+        Reserved reserved = new Reserved(1, Arrays.asList(new byte[][]{
+            Utils.hexToBytes("0F0F"),
+            Utils.hexToBytes("0101")
+        }));
+        tx.setReserved(reserved);
+        Transaction tx2 = Transaction.decode(tx.encode(), true);
+        assertEquals(tx, tx2);
     }
 }
