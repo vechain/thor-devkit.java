@@ -10,6 +10,7 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
+import java.util.List;
 
 import com.google.common.primitives.Bytes;
 
@@ -211,7 +212,30 @@ public class TransactionTest {
             Utils.hexToBytes("0101")
         }));
         tx.setReserved(reserved);
+
         Transaction tx2 = Transaction.decode(tx.encode(), true);
         assertEquals(tx, tx2);
+
+        List<byte[]> r = tx.getReserved().pack();
+        assertEquals(r.get(0), Utils.hexToBytes("01"));
+        assertEquals(r.get(1), Utils.hexToBytes("0F0F"));
+        assertEquals(r.get(2), Utils.hexToBytes("0101"));
+    }
+
+    @Test
+    public void unused2() {
+        Transaction tx = transaction.clone();
+        Reserved reserved = new Reserved(1, Arrays.asList(new byte[][]{
+            Utils.hexToBytes("0F0F"),
+            new byte[] {}
+        }));
+        tx.setReserved(reserved);
+
+        Transaction tx2 = Transaction.decode(tx.encode(), true);
+        assertEquals(tx, tx2);
+
+        List<byte[]> r = tx.getReserved().pack();
+        assertEquals(r.get(0), Utils.hexToBytes("01"));
+        assertEquals(r.get(1), Utils.hexToBytes("0F0F"));
     }
 }
