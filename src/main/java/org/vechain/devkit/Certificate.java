@@ -46,6 +46,10 @@ public class Certificate {
         this.signature = toLower(signature);
     }
 
+    public void setSignature(String signature) {
+        this.signature = toLower(signature);
+    }
+
     /** Verify that the payload is in good shape. */
     private static void checkPayload(Map<String, String> payload) {
         if (payload == null ) {
@@ -69,7 +73,7 @@ public class Certificate {
     }
 
     /** Create a new Map. */
-    Map<String, Object> toMap() {
+    public Map<String, Object> toMap() {
         TreeMap<String, Object> tm = new TreeMap<>();
         tm.put("purpose", this.purpose);
         tm.put("payload", this.payload);
@@ -81,7 +85,7 @@ public class Certificate {
     }
 
     /** Create a new Certificate instance. */
-    static Certificate fromMap(Map<String, Object> m) {
+    public static Certificate fromMap(Map<String, Object> m) {
         Map<String, String> payload = (Map<String, String>) m.get("payload");
         return new Certificate(
             (String) m.get("purpose"),

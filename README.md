@@ -29,7 +29,6 @@ Java (8+) library to assist smooth development on VeChain for developers and hob
 import org.vechain.devkit.cry.Utils;
 import org.vechain.devkit.cry.Secp256k1;
 
-
 byte[] priv = Secp256k1.newPrivateKey(); // byte[32].
 byte[] pub = Secp256k1.derivePublicKey(priv, false); // byte[65].
 byte[] addr = Address.publicKeyToAddressBytes(pub); // byte[20].
@@ -52,7 +51,6 @@ import org.vechain.devkit.cry.Secp256k1;
 import org.vechain.devkit.cry.Signature;
 import org.vechain.devkit.cry.Utils;
 
-
 byte[] priv = Utils.hexToBytes(
     "7582be841ca040aa940fff6c05773129e135623e41acce3e0b8ba520dc1ae26a"
 ); // byte[32].
@@ -72,9 +70,7 @@ byte[] pub = Secp256k1.recover(
 ); // byte[65].
 
 // Verify if the public key matches.
-System.out.println(
-    Arrays.equals(pub, Secp256k1.derivePublicKey(priv, false))
-); // true.
+Arrays.equals(pub, Secp256k1.derivePublicKey(priv, false));// true.
 ```
 
 ### Mnemonic Wallet
@@ -210,7 +206,6 @@ byte[] output2 = Keccak.keccak256(
     Utils.AsciiToBytes(inputs[2])
 ); // output1 == outpu2
 
-
 byte[] output3 = Blake2b.blake2b256(Utils.AsciiToBytes(input));
 byte[] output4 = Blake2b.blake2b256(
     Utils.AsciiToBytes(inputs[0]),
@@ -237,12 +232,9 @@ b.test(Utils.UTF8ToBytes("hello world")); // true.
 b.test(Utils.UTF8ToBytes("bye bye blue bird")); // false.
 ```
 
-### String/Hex
+### Hex/Bytes/String Convert
 ```java
 import org.vechain.devkit.cry.Utils;
-
-// strip string
-assert Utils.remove0x("0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed") == "5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed";
 
 // hex -> byte[]
 assert new byte[]{15,15} == Utils.hexToBytes("0F0F") // true
@@ -289,11 +281,11 @@ String f1 = """
     "stateMutability": "nonpayable",
     "type": "function"
 }
-""";
+"""; // Function definition.
 
 Function f = new Function(f1);
 
-// The selector of the function.
+// Calculate the selector of the function.
 assert f.selector() == Utils.hexToBytes("27fcbb2f");
 
 // Encode a function call with params (1, "foo").
@@ -303,7 +295,7 @@ assert f.encodeToHex(true, BigInteger.valueOf(1), "foo") == "0x27fcbb2f000000000
 // f.encode() -> to ByteBuffer
 ```
 
-### ABI: Decode Function Return Value
+### ABI: Decode Function Return
 ```kotlin
 import org.vechain.devkit.Function;
 import org.vechain.devkit.cry.Utils;
@@ -338,14 +330,14 @@ String f1 = """
     "stateMutability": "nonpayable",
     "type": "function"
 }
-""";
+"""; // Function definition.
 
 Function f = new Function(f1);
 
 // The function call return value.
 final byte[] data = Utils.hexToBytes("000000000000000000000000abc000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000003666f6f0000000000000000000000000000000000000000000000000000000000");
 
-// Decode to JSON String.
+// Decode above data to JSON String. (ABI v1)
 String decoded = f.decodeReturnV1Json(data, true, true);
 String expected = """
 [
@@ -364,25 +356,19 @@ String expected = """
 ]
 """ // decoded == expected
 
-// Alternatively,
-// f.decodeReturnV1() -> Get raw Java types.
+// Alternatively, f.decodeReturnV1() -> Get raw Java types.
 List<V1ParamWrapper> result = f.decodeReturnV1(data, true);
-assert result.get(0).name, == "r1";
-assert result.get(0).value == "0xabc0000000000000000000000000000000000001";
-assert result.get(1).name == "r2";
-assert result.get(1).value == "0x666f6f";
+result.get(0).name;  // "r1"
+result.get(0).value; // "0xabc0000000000000000000000000000000000001"
+result.get(1).name;  // "r2"
+result.get(1).value; // "0x666f6f"
 ```
 
-### Function - Decode Return Value (Cont.)
+### ABI: Decode Function Return (Cont.)
 ```kotlin
 import org.vechain.devkit.Function;
 import org.vechain.devkit.cry.Utils;
 
-// For unit64 and larger number types (eg. int72, unit256, address),
-// decode to BigInteger or to human-readable String.
-
-// For bytes1 ~ bytes32 and bytes[],
-// decode to byte[] or human-readable hex String.
 String f2 = """
 {
     "inputs": [],
@@ -405,21 +391,27 @@ String f2 = """
 """;
 Function f = new Function(f2);
 
-// The function call return value.
+// The function call return value in bytes.
 byte[] data = Utils.hexToBytes("000000000000000000000000000000000000000000000000000000000001e240fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe1dc0");
+
+// For unit64 and larger number types (eg. int72, unit256, address),
+// decode to BigInteger or to human-readable String.
 
 // human=false
 List<V1ParamWrapper> result = f.decodeReturnV1(data, false);
-assert result.get(0).value == new BigInteger("123456");
-assert result.get(1).value == new BigInteger("-123456");
+result.get(0).value; // BigInteger("123456");
+result.get(1).value; // BigInteger("-123456");
+
+// For bytes1 ~ bytes32 and bytes[],
+// decode to byte[] or human-readable hex String.
 
 // human=true
 List<V1ParamWrapper> result = f.decodeReturnV1(data, true);
-assert result.get(0).value == "123456"
-assert result.get(1).value == "-123456"
+result.get(0).value;// "123456"
+result.get(1).value;// "-123456"
 ```
 
-### ABI: Event Decoding
+### ABI: Decode Event Log
 ```kotlin
 import org.vechain.devkit.Event;
 import org.vechain.devkit.cry.Utils;
@@ -446,33 +438,273 @@ String e1 = """
 
 Event e = new Event(e1);
 
-// Signature
+// Calculate Signature
 byte[] expected = Utils.hexToBytes("47b78f0ec63d97830ace2babb45e6271b15a678528e901a9651e45b65105e6c2");
 assert e.calcEventSignature() == expected;
 
-// Topics (indexed params)
+// Suppose we have topics coming from servers (indexed params)
 List<byte[]> topics = new ArrayList<byte[]>();
 topics.add(Utils.hexToBytes("47b78f0ec63d97830ace2babb45e6271b15a678528e901a9651e45b65105e6c2"));
 topics.add(Utils.hexToBytes("0000000000000000000000000000000000000000000000000000000000000001"));
 
 // Decode the topics.
 List<V1ParamWrapper> indexedParams = e.decodeTopics(topics, false);
-assert indexedParams.size() == 1;
-assert indexedParams.get(0).canonicalType == "uint256";
-assert indexedParams.get(0).name == "a1";
-assert indexedParams.get(0).value == new BigInteger("1");
+indexedParams.size(); // 1
+indexedParams.get(0).canonicalType; // "uint256"
+indexedParams.get(0).name; // "a1"
+indexedParams.get(0).value; // BigInteger("1")
 // Alternatively,
-// e.decodeTopicsJson() -> Pretty JSON String.
+// e.decodeTopicsJson() -> Decode to JSON String.
 
 // Data (non-indexed params)
 byte[] data = Utils.hexToBytes("00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000003666f6f0000000000000000000000000000000000000000000000000000000000");
 
 // Deocde the data.
 List<V1ParamWrapper> nonIndexedParams = e.decodeDataV1(data, true);
-assert nonIndexedParams.size() == 1;
-assert nonIndexedParams.get(0).name == "a2";
-assert nonIndexedParams.get(0).canonicalType == "string";
-assert nonIndexedParams.get(0).value == "foo";
+nonIndexedParams.size(); // 1
+nonIndexedParams.get(0).name; // "a2"
+nonIndexedParams.get(0).canonicalType; // "string"
+nonIndexedParams.get(0).value; // "foo"
 // Alternatively,
-// e.decodeDataV1Json() -> Pretty JSON String.
+// e.decodeDataV1Json() -> Decode to JSON String.
 ```
+
+### Transaction
+
+```java
+// Transaction Structure:
+// See: https://docs.vechain.org/thor/learn/transaction-model.html#model
+import org.vechain.devkit.types.Clause;
+import org.vechain.devkit.Transaction;
+import org.vechain.devkit.cry.Blake2b;
+import org.vechain.devkit.cry.Secp256k1;
+import org.vechain.devkit.cry.Utils;
+
+// Set up clauses.
+Clause[] clauses = new Clause[]{
+    new Clause(
+        "0x7567d83b7b8d80addcb281a71d54fc7b3364ffed",   // to
+        "10000",                                        // value
+        "0x000000606060"                                // data
+    ),
+    new Clause(
+        "0x7567d83b7b8d80addcb281a71d54fc7b3364ffed",
+        "20000",
+        "0x000000606060"
+    )
+};
+
+// Create a tx.
+Transaction tx = new Transaction(
+    "1",                    // chainTag
+    "0x00000000aabbccdd",   // blockRef
+    "32",                   // expiration
+    clauses,                // clauses
+    "128",                  // gasPriceCoef
+    "21000",                // gas
+    null,                   // dependsOn
+    "12345678",             // nonce
+    null                    // reserved
+);
+
+// Sign the tx.
+byte[] privateKey = Utils.hexToBytes("7582be841ca040aa940fff6c05773129e135623e41acce3e0b8ba520dc1ae26a");
+byte[] h = Blake2b.blake2b256(
+    tx.encode() // unsigned tx encoded.
+);
+byte[] sig = Secp256k1.sign(h, privateKey);
+
+// Set signature on tx.
+tx.setSignature(sig);
+
+// Properties.
+tx.getId();
+tx.getSignature();
+tx.getIntrinsicGas(); // 37432
+tx.getOriginAsAddressBytes();
+tx.getOriginAsAddressString();
+
+// Signed tx encoded.
+byte[] encodedTx = tx.encode();
+// Then you can HTTP POST to send the encodedTx to VeChain...
+// See the REST API details:
+// testnet: https://sync-testnet.vechain.org/doc/swagger-ui/
+// mainnet: https://sync-mainnet.vechain.org/doc/swagger-ui/
+```
+
+### Transaction (VIP-191)
+[https://github.com/vechain/VIPs/blob/master/vips/VIP-191.md](https://github.com/vechain/VIPs/blob/master/vips/VIP-191.md)
+```java
+import com.google.common.primitives.Bytes;
+import org.vechain.devkit.types.Clause;
+import org.vechain.devkit.Transaction;
+import org.vechain.devkit.cry.Address;
+import org.vechain.devkit.cry.Blake2b;
+import org.vechain.devkit.cry.Secp256k1;
+import org.vechain.devkit.cry.Utils;
+
+// Set up clauses.
+Clause[] clauses = new Clause[]{
+    new Clause(
+        "0x7567d83b7b8d80addcb281a71d54fc7b3364ffed",   // to
+        "10000",                                        // value
+        "0x000000606060"                                // data
+    ),
+    new Clause(
+        "0x7567d83b7b8d80addcb281a71d54fc7b3364ffed",
+        "20000",
+        "0x000000606060"
+    )
+};
+
+// Reserved: VIP-191
+Reserved reserved = new Reserved(1, null);
+
+// Create a tx.
+Transaction tx = new Transaction(
+    "1",                    // chainTag
+    "0x00000000aabbccdd",   // blockRef
+    "32",                   // expiration
+    clauses,                // clauses
+    "128",                  // gasPriceCoef
+    "21000",                // gas
+    null,                   // dependsOn
+    "12345678",             // nonce
+    reserved                // <--- reserved (VIP-191)
+);
+
+// Sender
+byte[] priv_1 = Utils.hexToBytes("58e444d4fe08b0f4d9d86ec42f26cf15072af3ddc29a78e33b0ceaaa292bcf6b");
+byte[] addr_1 = Address.publicKeyToAddressBytes(Secp256k1.derivePublicKey(priv_1, false));
+
+// Gas Payer
+byte[] priv_2 = Utils.hexToBytes("0bfd6a863f347f4ef2cf2d09c3db7b343d84bb3e6fc8c201afee62de6381dc65");
+byte[] addr_2 = Address.publicKeyToAddressBytes(Secp256k1.derivePublicKey(priv_2, false));
+
+// Sender sign the message himself.
+byte[] h = tx.getSigningHash(null);
+byte[] senderHash = Secp256k1.sign(h, priv_1);
+
+// Gas payer sign the hash for the sender.
+byte[] dh = tx.getSigningHash("0x" + Utils.bytesToHex(addr_1));
+byte[] payerHash = Secp256k1.sign(dh, priv_2);
+
+// Assemble signature
+byte[] sig = Bytes.concat(senderHash, payerHash); // 130 bytes
+
+// Set the signature onto the tx.
+tx.setSignature(sig);
+
+tx.getOriginAsAddressBytes(); // Sender: addr_1
+tx.getDeleagtorAsAddressBytes(); // Gas Payer: addr_2
+
+// Signed tx encoded.
+byte[] encodedTx = tx.encode();
+// Then you can HTTP POST to send the encodedTx to VeChain...
+// See the REST API details:
+// testnet: https://sync-testnet.vechain.org/doc/swagger-ui/
+// mainnet: https://sync-mainnet.vechain.org/doc/swagger-ui/
+```
+
+### Sign & Verify Certificate (VIP-192)
+[https://github.com/vechain/VIPs/blob/master/vips/VIP-192.md](https://github.com/vechain/VIPs/blob/master/vips/VIP-192.md)
+```java
+import org.vechain.devkit.Certificate;
+import org.vechain.devkit.cry.Address;
+import org.vechain.devkit.cry.Blake2b;
+import org.vechain.devkit.cry.Secp256k1;
+import org.vechain.devkit.cry.Utils;
+
+/* For a Certificate looks like this:
+{
+  "purpose": "identification",
+  "payload": {
+    "type": "text",
+    "content": "fyi"
+  },
+  "domain": "localhost",
+  "timestamp": 1545035330,
+  "signer": "0xd989829d88b0ed1b06edf5c50174ecfa64f14a64"
+}
+*/
+
+byte[] priv = Utils.hexToBytes("7582be841ca040aa940fff6c05773129e135623e41acce3e0b8ba520dc1ae26a");
+byte[] addr = Address.publicKeyToAddressBytes(Secp256k1.derivePublicKey(priv, false));
+
+// Create a Certificate.
+Map<String, String> payload = new TreeMap<String, String>();
+payload.put("type", "text");
+payload.put("content", "fyi");
+
+Certificate c = new Certificate(
+    "identification",               // purpose
+    payload,                        // payload
+    "localhost",                    // domian
+    1545035330,                     // timestamp
+    "0x" + Utils.bytesToHex(addr),  // signer
+    null                            // signature
+);
+
+// Or create from some external json string.
+Certificate c2 = Certificate.fromJsonString(...);
+
+// Or create from some external Map<String, Object>.
+Certificate c3 = Certificate.fromMap(...);
+
+// Sign the cert.
+// 1) Calculate signature.
+String j = c.toJsonString();
+byte[] signingHash = Blake2b.blake2b256(Utils.UTF8ToBytes(j));
+byte[] sig = Secp256k1.sign(signingHash, priv);
+// 2) Set signature on cert.
+c.setSignature("0x" + Utils.bytesToHex(sig));
+// 3) Verify. If signature matches this cert.
+Certificate.verify(c);
+```
+
+## Tweak the code
+```
+── devkit
+   ├── Bloom.java
+   ├── Certificate.java
+   ├── Event.java
+   ├── Function.java
+   ├── Transaction.java
+   ├── cry
+   │   ├── Address.java
+   │   ├── Blake2b.java
+   │   ├── HDNode.java
+   │   ├── Keccak.java
+   │   ├── Keystore.java
+   │   ├── Mnemonic.java
+   │   ├── Secp256k1.java
+   │   ├── Signature.java
+   │   └── Utils.java
+   └── types
+       ├── BlobKind.java
+       ├── Clause.java
+       ├── CompactFixedBlobKind.java
+       ├── FixedBlobKind.java
+       ├── NullableFixedBlobKind.java
+       ├── NumericKind.java
+       ├── Reserved.java
+       ├── ScalarKind.java
+       └── V1ParamWrapper.java
+```
+## Testing
+```bash
+gradle test
+```
+
+## Knowledge
+
+|     Name     | Bytes |                  Description                   |
+| ------------ | ----- | ---------------------------------------------- |
+| private key  | 32    | random number                                  |
+| public key   | 65    | uncompressed, starts with "04"                 |
+| address      | 20    | derived from public key                        |
+| keccak256    | 32    | hash                                           |
+| blake2b256   | 32    | hash                                           |
+| message hash | 32    | hash of a message                              |
+| signature    | 65    | signing result, last bit as recovery parameter |
+| seed         | 64    | used to derive bip32 master key                |
