@@ -128,6 +128,11 @@ public class Utils {
         return input.getBytes(Charsets.US_ASCII);
     }
 
+    /**
+     * Convert UTF-8 strings to bytes.
+     * @param input
+     * @return
+     */
     public static byte[] UTF8ToBytes(String input) {
         return input.getBytes(Charsets.UTF_8);
     }
@@ -145,7 +150,7 @@ public class Utils {
         return result;
     }
 
-    // [byte[], byte[], [byte[], byte[]]]
+    // Pretty print [byte[], byte[], [byte[], byte[]]]
     public static void prettyPrint(Object[] raw, int indent) {
         final int internalIndent = 2;
         System.out.println(" ".repeat(indent) + "[");
@@ -167,7 +172,7 @@ public class Utils {
         System.out.println(" ".repeat(indent) + "]");
     }
 
-    // byte[]
+    // Pretty print byte[]
     public static void prettyPrint(byte[] raw, int indent) {
         if (raw.length > 0) {
             System.out.println(" ".repeat(indent) + bytesToHex(raw));

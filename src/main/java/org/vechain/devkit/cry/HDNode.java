@@ -100,6 +100,11 @@ public class HDNode {
         );
     }
 
+    /**
+     * Derive child HDNode from an existing HDNode.
+     * @param childNumber
+     * @return
+     */
     public HDNode derive(int childNumber) {
         return new HDNode(
             HDKeyDerivation.deriveChildKey(this.pair, childNumber)

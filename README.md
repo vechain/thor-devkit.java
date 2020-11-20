@@ -1,6 +1,6 @@
 # VeChain Thor Devkit (SDK) in Java
 
-Java (8+) library to assist smooth development on VeChain for developers and hobbyists.
+Java (8+) library to assist a smoother development process on VeChainThor for all developers and hobbyists.
 
 |                          Content                          |
 | --------------------------------------------------------- |
@@ -42,7 +42,7 @@ System.out.println(checksumAddress);
 // 0x63ad8A6D015aE579ad128e0c63040bB860Cc5D34
 ```
 
-### Sign & Verify Signature
+### Sign & Verify Signatures
 
 ```java
 import java.util.Arrays;

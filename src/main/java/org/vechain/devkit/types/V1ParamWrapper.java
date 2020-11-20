@@ -1,7 +1,6 @@
 package org.vechain.devkit.types;
 
-// ABI v1 style paramter wrapper.
-// This can be further process into JSON.
+/** ABI v1 style paramter wrapper. This can be further process into JSON. */
 public class V1ParamWrapper {
     public int index; // The parameter position in the tuple.
     public String name; // The name of the parameter, can be "".

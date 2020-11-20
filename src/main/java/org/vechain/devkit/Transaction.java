@@ -136,12 +136,10 @@ public class Transaction {
         }
     }
 
-    // Get Tx signature.
     public byte[] getSignature() {
         return this.signature;
     }
 
-    // Set Tx signature.
     public void setSignature(byte[] data) {
         this.signature = data;
     }

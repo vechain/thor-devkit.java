@@ -1,8 +1,6 @@
 package org.vechain.devkit.types;
 
 import java.util.Arrays;
-import java.util.List;
-
 import com.google.common.primitives.Bytes;
 
 /**
@@ -74,7 +72,5 @@ public class CompactFixedBlobKind extends FixedBlobKind {
         } else {
             return super.fromBytes(data);
         }
-
-        
     }
 }
