@@ -67,7 +67,7 @@ public class Event {
     }
 
     /**
-     * Decode the data section of event.
+     * Decode the data section of event. -> ABI v1.
      * @param data
      * @param human
      * @return
@@ -82,7 +82,7 @@ public class Event {
     }
 
     /**
-     * Decode the data section of an event.
+     * Decode the data section of an event. -> ABI v1.
      * @param data
      * @param pretty
      * @param human
