@@ -1,23 +1,21 @@
-This is a work-in-progress project. Help is welcomed.
-
 # VeChain Thor Devkit (SDK) in Java
 
 Java (8+) library to assist smooth development on VeChain for developers and hobbyists.
 
-|                             Content                              |
-| ---------------------------------------------------------------- |
-| Public key, private key, address conversion.                     |
-| Mnemonic Wallets.                                                |
-| HD Wallet.                                                       |
-| Keystore.                                                        |
-| Various Hashing functions.                                       |
-| Signing messages.                                                |
-| Verify signature of messages.                                    |
-| Bloom filter.                                                    |
+|                          Content                          |
+| --------------------------------------------------------- |
+| Public key, private key, address conversion.              |
+| Mnemonic Wallets.                                         |
+| HD Wallet.                                                |
+| Keystore.                                                 |
+| Various Hashing functions.                                |
+| Signing messages.                                         |
+| Verify signature of messages.                             |
+| Bloom filter.                                             |
 | Transaction Assembling (**Multi-task Transaction, MTT**). |
-| Fee Delegation Transaction (**VIP-191**).                  |
-| Self-signed Certificate (**VIP-192**). (TODO)                    |
-| ABI decoding of "functions" and "events" in logs.          |
+| Fee Delegation Transaction (**VIP-191**).                 |
+| Self-signed Certificate (**VIP-192**).                    |
+| ABI decoding of "functions" and "events" in logs.         |
 
 ... and will always be updated with the **newest** features on VeChain.
 
@@ -33,9 +31,7 @@ import org.vechain.devkit.cry.Secp256k1;
 
 
 byte[] priv = Secp256k1.newPrivateKey(); // byte[32].
-
 byte[] pub = Secp256k1.derivePublicKey(priv, false); // byte[65].
-
 byte[] addr = Address.publicKeyToAddressBytes(pub); // byte[20].
 
 String address = "0x" + Utils.bytesToHex(addr);
@@ -198,7 +194,7 @@ byte[] priv = Keystore.decrypt(ks, password);
 String ks = Keystore.encrypt(priv, password, true);
 ```
 
-### Hash the Messages
+### Hash
 ```java
 import org.vechain.devkit.cry.Keccak;
 import org.vechain.devkit.cry.Blake2b;
@@ -243,7 +239,6 @@ b.test(Utils.UTF8ToBytes("bye bye blue bird")); // false.
 
 ### String/Hex
 ```java
-
 import org.vechain.devkit.cry.Utils;
 
 // strip string
@@ -259,7 +254,7 @@ assert Utils.bytesToHex(new byte[]{15,15}) == "0f0f"; // true
 assert new byte[]{49,50,51} == Utils.AsciiToBytes("123") // true
 ```
 
-### Function - Encode Function Calls.
+### ABI: Enode Function Calls.
 ```kotlin
 import org.vechain.devkit.Function;
 import org.vechain.devkit.cry.Utils;
@@ -308,7 +303,7 @@ assert f.encodeToHex(true, BigInteger.valueOf(1), "foo") == "0x27fcbb2f000000000
 // f.encode() -> to ByteBuffer
 ```
 
-### Function - Decode Return Value
+### ABI: Decode Function Return Value
 ```kotlin
 import org.vechain.devkit.Function;
 import org.vechain.devkit.cry.Utils;
@@ -422,10 +417,9 @@ assert result.get(1).value == new BigInteger("-123456");
 List<V1ParamWrapper> result = f.decodeReturnV1(data, true);
 assert result.get(0).value == "123456"
 assert result.get(1).value == "-123456"
-
 ```
 
-### Event
+### ABI: Event Decoding
 ```kotlin
 import org.vechain.devkit.Event;
 import org.vechain.devkit.cry.Utils;
@@ -469,7 +463,6 @@ assert indexedParams.get(0).name == "a1";
 assert indexedParams.get(0).value == new BigInteger("1");
 // Alternatively,
 // e.decodeTopicsJson() -> Pretty JSON String.
-
 
 // Data (non-indexed params)
 byte[] data = Utils.hexToBytes("00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000003666f6f0000000000000000000000000000000000000000000000000000000000");
