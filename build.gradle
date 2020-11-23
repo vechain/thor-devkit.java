@@ -42,6 +42,9 @@ test {
 
 // Manual overrides
 version = '0.9.0'
+group = 'org.vechain'
+archivesBaseName =  'devkit'
+
 description = """
 Java library to assist smooth development on VeChain,
  for developers and hobbyists.
