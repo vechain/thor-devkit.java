@@ -73,7 +73,7 @@ public class Utils {
      * @return
      */
     public static String prependChars(String input, String prefix, int count) {
-        return prefix.repeat(count) + input;
+        return repeat(prefix, count) + input;
     }
 
     /**
@@ -93,7 +93,7 @@ public class Utils {
             throw new IllegalArgumentException("cannot divide!");
         }
 
-        return prefix.repeat( wanted / prefix.length() ) + input;
+        return repeat(prefix, wanted / prefix.length() ) + input;
     }
 
     /**
@@ -153,7 +153,7 @@ public class Utils {
     // Pretty print [byte[], byte[], [byte[], byte[]]]
     public static void prettyPrint(Object[] raw, int indent) {
         final int internalIndent = 2;
-        System.out.println(" ".repeat(indent) + "[");
+        System.out.println(repeat(" ", indent) + "[");
         for (Object o : raw) {
             // bytes? print it!
             if (o instanceof byte[]) {
@@ -169,15 +169,24 @@ public class Utils {
                 prettyPrint((Object[]) o, indent+internalIndent);
             }
         }
-        System.out.println(" ".repeat(indent) + "]");
+        System.out.println(repeat(" ", indent) + "]");
     }
 
     // Pretty print byte[]
     public static void prettyPrint(byte[] raw, int indent) {
         if (raw.length > 0) {
-            System.out.println(" ".repeat(indent) + bytesToHex(raw));
+            System.out.println(repeat(" ", indent) + bytesToHex(raw));
         } else {
-            System.out.println(" ".repeat(indent) + "(empty byte[])");
+            System.out.println(repeat(" ", indent) + "(empty byte[])");
         }
+    }
+
+    /** Avoid str.repeat in Java 11+, Keep this SDK Java 8 compatible. */
+    public static String repeat(String str, int count) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < count; i++) {
+            sb.append(str);
+        }
+        return sb.toString();
     }
 }
