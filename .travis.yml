@@ -10,7 +10,7 @@ before_deploy:
 
 deploy:
   draft: true
-  cleanup: false
+  skip_cleanup: true
   provider: releases
   token: GH_TOKEN
   file: build/libs/*.jar
