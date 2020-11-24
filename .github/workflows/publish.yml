@@ -21,9 +21,14 @@ jobs:
         run: chmod +x gradlew
       - name: Build with Gradle
         run: ./gradlew build
+      - uses: jungwinter/split@v1
+        id: split
+        with:
+          msg: ${{ github.ref }}
+          seperator: '/'
       - name: Zip the artifact
         run: |
-          zip --junk-paths -r release-${{ github.ref }}-jar.zip build/libs
+          zip --junk-paths -r release-${{ steps.split.outputs._2 }}-jar.zip build/libs
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -41,6 +46,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: ./release-${{ github.ref }}-jar.zip
-          asset_name: release-${{ github.ref }}-jar.zip
+          asset_path: ./release-${{ steps.split.outputs._2 }}-jar.zip
+          asset_name: release-${{ steps.split.outputs._2 }}-jar.zip
           asset_content_type: application/zip
