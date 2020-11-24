@@ -23,6 +23,9 @@ Java (8+) library to assist a smoother development process on VeChainThor for al
 - Checkout the JAR file on the "release" page.
 - Or build locally with `gradle build` (higher security).
 
+This SDK is build on top of gson, guava and other libraries.
+See "build.gradle" to include those dependencies manually in your project.
+
 # Tutorials
 
 ### Private/Public Keys
