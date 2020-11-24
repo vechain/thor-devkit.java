@@ -38,7 +38,7 @@ test {
 }
 
 // Manual overrides
-version = '0.9.4'
+version = '0.9.5'
 group = 'org.vechain'
 archivesBaseName =  'devkit'
 
