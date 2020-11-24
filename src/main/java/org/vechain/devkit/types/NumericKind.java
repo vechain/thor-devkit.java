@@ -11,7 +11,7 @@ import java.util.Arrays;
 /**
  * Positive or Zero number kind of integers.
  */
-public class NumericKind implements ScalarKind <BigInteger> {
+final public class NumericKind implements ScalarKind <BigInteger> {
     public static final int MAX = 256; // MAX bit length is 256-bits.
     public static final BigInteger ZERO = new BigInteger("0"); // Smallest is 0.
 

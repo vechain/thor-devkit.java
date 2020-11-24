@@ -8,7 +8,7 @@ import com.google.common.primitives.Bytes;
  * 
  * When encoded, the resulting byte[] will remove the leading 0.
  */
-public class CompactFixedBlobKind extends FixedBlobKind {
+final public class CompactFixedBlobKind extends FixedBlobKind {
 
     public CompactFixedBlobKind(int byteLength) {
         super(byteLength);

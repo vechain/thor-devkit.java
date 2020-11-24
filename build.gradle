@@ -9,6 +9,7 @@
 plugins {
     // Apply the java-library plugin to add support for Java Library
     id 'java-library'
+    id "com.github.johnrengelman.shadow" version "5.2.0"
 }
 
 repositories {
@@ -36,7 +37,7 @@ test {
 }
 
 // Manual overrides
-version = '0.9.8'
+version = '0.9.9'
 group = 'org.vechain'
 archivesBaseName =  'devkit'
 
@@ -46,3 +47,13 @@ Java library to assist smooth development on VeChain,
 
 Includes wallets creation, transaction assembling,
 signature, ABI encoding and bloom filter."""
+
+shadowJar {
+    project.configurations.implementation.canBeResolved = true
+    configurations = [project.configurations.implementation]
+
+    relocate 'com.google.common', 'vechain.common'
+    relocate 'com.google.gson', 'vechain.gson'
+    relocate 'org.bouncycastle', 'vechain.bouncycastle'
+    relocate 'org.web3j', 'vechain.web3j'
+}

@@ -9,7 +9,7 @@ import java.util.List;
  *   unused: List<byte[]>
  * }
  */
-public class Reserved {
+final public class Reserved {
     final static NumericKind featuresKind = new NumericKind(4);
     private int features;
     private List<byte[]> unused;

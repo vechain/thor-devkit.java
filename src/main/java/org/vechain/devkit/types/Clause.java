@@ -18,7 +18,7 @@ import com.google.gson.Gson;
  *   data:  BlobKind()                  // the call data, if not call data fill in "0x"
  * }
  */
-public class Clause {
+final public class Clause {
     public final NullableFixedBlobKind to = new NullableFixedBlobKind(20);
     public final NumericKind value = new NumericKind(32);
     public final BlobKind data = new BlobKind();

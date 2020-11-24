@@ -10,7 +10,7 @@ package org.vechain.devkit.types;
  * To object:
  * byte[]{} => null;
  */
-public class NullableFixedBlobKind extends FixedBlobKind {
+final public class NullableFixedBlobKind extends FixedBlobKind {
 
     public NullableFixedBlobKind(int byteLength) {
         super(byteLength);
