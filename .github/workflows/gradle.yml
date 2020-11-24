@@ -4,10 +4,12 @@
 name: Java CI with Gradle
 
 on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+  # push:
+  #   branches: [ master ]
+  # pull_request:
+  #   branches: [ master ]
+  release:
+    types: [created]
 
 jobs:
   build:
@@ -24,8 +26,12 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       run: ./gradlew build
-    - uses: actions/upload-artifact@v2
-      with:
-        name: jar-artifact
-        path: build/libs
-        if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+    - name: Publish package
+      run: gradle publish
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    # - uses: actions/upload-artifact@v2
+    #   with:
+    #     name: jar-artifact
+    #     path: build/libs
+    #     if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
