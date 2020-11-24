@@ -20,7 +20,7 @@ Java (8+) library to assist a smoother development process on VeChainThor for al
 ... and will always be updated with the **newest** features on VeChain.
 
 # Install
-(TODO)
+Download the JAR file on the release page to include in your project.
 
 # Tutorials
 
