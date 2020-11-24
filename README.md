@@ -20,7 +20,8 @@ Java (8+) library to assist a smoother development process on VeChainThor for al
 ... and will always be updated with the **newest** features on VeChain.
 
 # Install
-Download the JAR file on the release page to include in your project.
+- Checkout the JAR file on the "release" page.
+- Or build locally with `gradle build` (higher security).
 
 # Tutorials
 
