@@ -49,15 +49,3 @@ Java library to assist smooth development on VeChain,
 Includes wallets creation, transaction assembling,
 signature, ABI encoding and bloom filter."""
 
-publishing {
-  repositories {
-    maven {
-      name = "GitHubPackages"
-      url = "https://maven.pkg.github.com/laalaguer/thor-devkit.java"
-      credentials {
-        username = System.getenv("GITHUB_ACTOR")
-        password = System.getenv("GITHUB_TOKEN")
-      }
-    }
-  }
-}
