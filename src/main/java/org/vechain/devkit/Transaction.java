@@ -19,6 +19,7 @@ import org.vechain.devkit.types.NumericKind;
 import org.vechain.devkit.types.Reserved;
 import org.vechain.devkit.types.CompactFixedBlobKind;
 import org.vechain.devkit.types.NullableFixedBlobKind;
+import java.math.BigInteger;
 
 /**
  * Tx = {
@@ -26,16 +27,23 @@ import org.vechain.devkit.types.NullableFixedBlobKind;
  *  blockRef:
  *  expiration:
  *  clauses: [clause, clause, ...]
- *  gasPriceCoef:
+ *  gasPriceCoef: (optional for txType 0x51)
  *  gas:
  *  dependsOn:
  *  nonce:
  *  reserved:
+ *  txType: (new for Galactica, 0x51 for EIP-1559 style transactions)
+ *  maxFeePerGas: (new for Galactica when txType=0x51)
+ *  maxPriorityFeePerGas: (new for Galactica when txType=0x51)
  * }
  */
 public class Transaction {
     // static fields.
     private final static int DELEGATED_MASK = 1;
+    
+    // Transaction types
+    public static final byte TX_TYPE_LEGACY = 0x00;
+    public static final byte TX_TYPE_DYNAMIC_FEE = 0x51; // Galactica dynamic fee transaction type
 
     // member fields.
     NumericKind chainTag = new NumericKind(1);
@@ -47,6 +55,11 @@ public class Transaction {
     NullableFixedBlobKind dependsOn = new NullableFixedBlobKind(32);
     NumericKind nonce = new NumericKind(8);
     Reserved reserved;
+    
+    // Galactica fields
+    byte txType = TX_TYPE_LEGACY; // Default to legacy transaction type
+    NumericKind maxFeePerGas = null; // Only used when txType is TX_TYPE_DYNAMIC_FEE
+    NumericKind maxPriorityFeePerGas = null; // Only used when txType is TX_TYPE_DYNAMIC_FEE
 
     // Set this member later.
     // Only signed transaction has signature.
@@ -62,7 +75,10 @@ public class Transaction {
         byte[] gas,
         byte[] dependsOn,
         byte[] nonce,
-        List<byte[]> reserved
+        List<byte[]> reserved,
+        byte txType,
+        byte[] maxFeePerGas,
+        byte[] maxPriorityFeePerGas
     ){
         this.chainTag.fromBytes(chainTag);
         this.blockRef.fromBytes(blockRef);
@@ -76,7 +92,10 @@ public class Transaction {
         temp = _clauses.toArray(temp);
         this.clauses = temp;
         
-        this.gasPriceCoef.fromBytes(gasPriceCoef);
+        // For dynamic fee transactions, gasPriceCoef is optional
+        if (gasPriceCoef != null) {
+            this.gasPriceCoef.fromBytes(gasPriceCoef);
+        }
         this.gas.fromBytes(gas);
         this.dependsOn.fromBytes(dependsOn);
         this.nonce.fromBytes(nonce);
@@ -90,10 +109,23 @@ public class Transaction {
             this.reserved = Reserved.getNullReserved();
         }
         
+        // Set Galactica fields
+        this.txType = txType;
+        if (txType == TX_TYPE_DYNAMIC_FEE) {
+            if (maxFeePerGas != null) {
+                this.maxFeePerGas = new NumericKind(32); // 256-bit value
+                this.maxFeePerGas.fromBytes(maxFeePerGas);
+            }
+            if (maxPriorityFeePerGas != null) {
+                this.maxPriorityFeePerGas = new NumericKind(32); // 256-bit value
+                this.maxPriorityFeePerGas.fromBytes(maxPriorityFeePerGas);
+            }
+        }
+        
     }
 
     /**
-     * Construct a Transaction.
+     * Construct a legacy Transaction.
      * @param chainTag eg. "1"
      * @param blockRef eg. "0x00000000aabbccdd"
      * @param expiration eg. "32"
@@ -134,6 +166,9 @@ public class Transaction {
         } else {
             this.reserved = reserved;
         }
+        
+        // Set as legacy transaction type
+        this.txType = TX_TYPE_LEGACY;
     }
 
     public byte[] getSignature() {
@@ -306,18 +341,35 @@ public class Transaction {
         for (Clause c: this.clauses) {
             _clauses.add(c.pack());
         }
+        
+        // Build transaction body based on transaction type
+        List<Object> bodyElements = new ArrayList<>();
+        bodyElements.add(this.chainTag.toBytes());
+        bodyElements.add(this.blockRef.toBytes());
+        bodyElements.add(this.expiration.toBytes());
+        bodyElements.add(_clauses);
+        
+        if (this.txType == TX_TYPE_LEGACY || this.gasPriceCoef != null) {
+            bodyElements.add(this.gasPriceCoef.toBytes());
+        }
+        
+        bodyElements.add(this.gas.toBytes());
+        bodyElements.add(this.dependsOn.toBytes());
+        bodyElements.add(this.nonce.toBytes());
+        bodyElements.add(_reserved);
+        
+        // Add dynamic fee transaction fields if applicable
+        if (this.txType == TX_TYPE_DYNAMIC_FEE) {
+            if (this.maxFeePerGas != null) {
+                bodyElements.add(this.maxFeePerGas.toBytes());
+            }
+            if (this.maxPriorityFeePerGas != null) {
+                bodyElements.add(this.maxPriorityFeePerGas.toBytes());
+            }
+        }
+        
         // Prepare unsigned tx.
-        Object[] unsignedBody = new Object[] {
-            this.chainTag.toBytes(),
-            this.blockRef.toBytes(),
-            this.expiration.toBytes(),
-            _clauses,
-            this.gasPriceCoef.toBytes(),
-            this.gas.toBytes(),
-            this.dependsOn.toBytes(),
-            this.nonce.toBytes(),
-            _reserved
-        };
+        Object[] unsignedBody = bodyElements.toArray();
 
         return new ArrayList<Object>(Arrays.asList(unsignedBody));
     }
@@ -458,30 +510,122 @@ public class Transaction {
     }
 
     /**
+     * Construct a dynamic fee Transaction (EIP-1559 style).
+     * @param chainTag eg. "1"
+     * @param blockRef eg. "0x00000000aabbccdd"
+     * @param expiration eg. "32"
+     * @param clauses See Clause.java
+     * @param gas eg. "21000"
+     * @param dependsOn eg. "0x..." as block ID, or null if not wish to depends on.
+     * @param nonce eg. "12345678", as a random positive number max width is 8 bytes.
+     * @param maxFeePerGas The maximum fee per gas the sender is willing to pay
+     * @param maxPriorityFeePerGas The maximum priority fee per gas
+     * @param reserved See Reserved.java
+     */
+    public Transaction(
+        String chainTag,
+        String blockRef,
+        String expiration,
+        Clause[] clauses, // don't be null.
+        String gas,
+        String dependsOn, // can be null
+        String nonce,
+        String maxFeePerGas,
+        String maxPriorityFeePerGas,
+        Reserved reserved // can be null
+    ){
+        this.chainTag.setValue(chainTag);
+        this.blockRef.setValue(blockRef);
+        this.expiration.setValue(expiration);
+
+        if (clauses == null) {
+            throw new IllegalArgumentException("Fill in the clauses, please.");
+        } else {
+            this.clauses = clauses;
+        }
+
+        // gasPriceCoef is not used in dynamic fee transactions
+        this.gas.setValue(gas);
+        this.dependsOn.setValue(dependsOn);
+        this.nonce.setValue(nonce);
+        if (reserved == null) {
+            this.reserved = Reserved.getNullReserved();
+        } else {
+            this.reserved = reserved;
+        }
+        
+        // Set as dynamic fee transaction
+        this.txType = TX_TYPE_DYNAMIC_FEE;
+        
+        // Set dynamic fee parameters
+        this.maxFeePerGas = new NumericKind(32);
+        this.maxFeePerGas.setValue(maxFeePerGas);
+        
+        this.maxPriorityFeePerGas = new NumericKind(32);
+        this.maxPriorityFeePerGas.setValue(maxPriorityFeePerGas);
+    }
+    
+    /**
+     * Get the transaction type.
+     * @return TX_TYPE_LEGACY (0x00) or TX_TYPE_DYNAMIC_FEE (0x51)
+     */
+    public byte getTxType() {
+        return this.txType;
+    }
+    
+    /**
+     * Get the maximum fee per gas for dynamic fee transactions.
+     * @return maxFeePerGas value as a string, or null if not set
+     */
+    public String getMaxFeePerGas() {
+        return this.maxFeePerGas != null ? this.maxFeePerGas.toString() : null;
+    }
+    
+    /**
+     * Get the maximum priority fee per gas for dynamic fee transactions.
+     * @return maxPriorityFeePerGas value as a string, or null if not set
+     */
+    public String getMaxPriorityFeePerGas() {
+        return this.maxPriorityFeePerGas != null ? this.maxPriorityFeePerGas.toString() : null;
+    }
+    
+    /**
      * Encode a tx into bytes.
      * @return
      */
     public byte[] encode() {
         List<Object> unsignedTxBody = this.packUnsignedTxBody();
+        unsignedTxBody.add(this.getSignature());
 
-         // Pack more: append the sig bytes at the end.
-        if (this.getSignature() != null) {
-            unsignedTxBody.add(this.getSignature());
+        byte[] rlpTx = RLPEncoder.encodeAsList(unsignedTxBody.toArray());
+        
+        // For dynamic fee transactions, prepend the transaction type
+        if (this.txType == TX_TYPE_DYNAMIC_FEE) {
+            byte[] result = new byte[rlpTx.length + 1];
+            result[0] = TX_TYPE_DYNAMIC_FEE;
+            System.arraycopy(rlpTx, 0, result, 1, rlpTx.length);
+            return result;
         }
-
-        // RLP encode the packed body.
-        return RLPEncoder.encodeAsList(unsignedTxBody);
+        
+        return rlpTx;
     }
 
     /**
      * Decode a tx from byte[] data.
      * 1) Tx can be signed,
      * 2) Tx can be unsigned.
+     * 3) Tx can be legacy (0x00) or dynamic fee (0x51)
      * @param data
      * @param unsigned
      * @return
      */
     public static Transaction decode(byte[] data, boolean unsigned) {
+        if (data[0] == TX_TYPE_DYNAMIC_FEE) {
+            // Remove the transaction type byte
+            byte[] txData = new byte[data.length - 1];
+            System.arraycopy(data, 1, txData, 0, data.length - 1);
+            data = txData;
+        }
 
         Iterator<RLPItem> l = RLPDecoder.RLP_STRICT.listIterator(data);
 
@@ -508,7 +652,22 @@ public class Transaction {
             _reserved.add(reservedIterator.next().asBytes());
         }
 
-        Transaction x = new Transaction(
+        byte txType = TX_TYPE_LEGACY;
+        byte[] _maxFeePerGas = null;
+        byte[] _maxPriorityFeePerGas = null;
+
+        if (data.length > l.getOffset()) {
+            // Check if there are additional fields for dynamic fee transactions
+            if (l.hasNext()) {
+                _maxFeePerGas = l.next().asBytes();
+            }
+            if (l.hasNext()) {
+                _maxPriorityFeePerGas = l.next().asBytes();
+            }
+            txType = TX_TYPE_DYNAMIC_FEE;
+        }
+
+        Transaction tx = new Transaction(
             _chainTag,
             _blockRef,
             _expiration,
@@ -517,15 +676,18 @@ public class Transaction {
             _gas,
             _dependsOn,
             _nonce,
-            _reserved
+            _reserved,
+            txType,
+            _maxFeePerGas,
+            _maxPriorityFeePerGas
         );
 
         if (!unsigned) {
             byte[] sig = l.next().asBytes();
-            x.setSignature(sig);
+            tx.setSignature(sig);
         }
 
-        return x;
+        return tx;
     }
 
     @Override
