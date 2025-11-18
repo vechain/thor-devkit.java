@@ -18,16 +18,26 @@ repositories {
 
 dependencies {
     implementation 'com.google.guava:guava:29.0-jre'
-    implementation 'org.bouncycastle:bcpkix-jdk15on:1.66' // Android classloader cannnot handle 1.66
-    implementation 'org.bouncycastle:bcprov-jdk15on:1.66' // Android classloader cannnot handle 1.66
+    implementation 'org.bouncycastle:bcpkix-jdk15on:1.79' // Android classloader cannnot handle 1.66
+    implementation 'org.bouncycastle:bcprov-jdk15on:1.78' // Android classloader cannnot handle 1.66
     implementation 'org.bitcoinj:bitcoinj-core:0.14.7' // Bitcoinj
     implementation 'org.web3j:crypto:5.0.0' // Web3j
     implementation 'org.web3j:core:5.0.0' // Web3j
     implementation 'com.esaulpaugh:headlong:4.0.0' // ABI, RLP
-    implementation 'com.google.code.gson:gson:2.8.6' // JSON
+    implementation 'com.google.code.gson:gson:2.8.9' // JSON
 
     // Use TestNG framework, also requires calling test.useTestNG() below
     testImplementation 'org.testng:testng:7.3.0'
+
+    // Version constraints for transitive dependencies
+    constraints {
+        implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.7.1'
+        implementation 'org.java-websocket:Java-WebSocket:1.5.0'
+        implementation 'com.fasterxml.jackson.core:jackson-core:2.15.0'
+        implementation 'com.squareup.okio:okio:1.17.6'
+        implementation 'com.squareup.okhttp3:okhttp:4.9.2'
+        implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.6.0'
+    }
 }
 
 test {
